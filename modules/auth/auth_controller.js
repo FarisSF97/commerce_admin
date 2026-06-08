@@ -81,6 +81,85 @@ const auth = {
         message: 'Terjadi kesalahan. Silakan coba lagi.'
       });
     }
+  },
+
+  forgotPassword: (req, res) => {
+    res.render('auth/views/forgot_password');
+  },
+
+  processForgotPassword: async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ status: 'failed', message: 'Email diperlukan' });
+    }
+
+    try {
+      const apiResponse = await axios.post(`${API_BASE_URL}/forgot_password`, {
+        email,
+        redirect_port: 7900
+      }, {
+        withCredentials: true
+      });
+
+      return res.json(apiResponse.data);
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      return res.status(error.response?.status || 500).json({
+        status: 'failed',
+        message: error.response?.data?.message || 'Gagal memproses'
+      });
+    }
+  },
+
+  resetPassword: async (req, res) => {
+    const { token } = req.params;
+
+    if (!token) {
+      return res.render('auth/views/reset_password', { token: null, tokenValid: false, error: 'Token tidak valid' });
+    }
+
+    try {
+      const apiResponse = await axios.get(`${API_BASE_URL}/validate_reset_token/${encodeURIComponent(token)}`, {
+        withCredentials: true
+      });
+
+      if (apiResponse.data.status === 'success') {
+        return res.render('auth/views/reset_password', { token, tokenValid: true, error: null });
+      }
+
+      return res.render('auth/views/reset_password', { token: null, tokenValid: false, error: apiResponse.data.message || 'Token tidak valid atau sudah kedaluwarsa' });
+    } catch (error) {
+      console.error('Validate reset token error:', error);
+      const message = error.response?.data?.message || 'Token tidak valid atau sudah kedaluwarsa';
+      return res.render('auth/views/reset_password', { token: null, tokenValid: false, error: message });
+    }
+  },
+
+  processResetPassword: async (req, res) => {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ status: 'failed', message: 'Token dan password diperlukan' });
+    }
+
+    if (password.length < 4) {
+      return res.status(400).json({ status: 'failed', message: 'Password minimal 4 karakter' });
+    }
+
+    try {
+      const apiResponse = await axios.post(`${API_BASE_URL}/reset_password`, { token, password }, {
+        withCredentials: true
+      });
+
+      return res.json(apiResponse.data);
+    } catch (error) {
+      console.error('Reset password error:', error);
+      return res.status(error.response?.status || 500).json({
+        status: 'failed',
+        message: error.response?.data?.message || 'Gagal mereset password'
+      });
+    }
   }
 };
 
