@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Telegram Booster</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #1a1a2e;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .header h1 { font-size: 24px; color: #e0e0e0; }
+    .header a {
+      color: #dc3545; text-decoration: none; font-weight: 600;
+      padding: 8px 20px; border: 1px solid #dc3545;
+      border-radius: 6px; transition: all 0.2s;
+    }
+    .header a:hover { background: #dc3545; color: white; }
+
+    .tabs {
+      display: flex; gap: 0; margin-bottom: 0;
+      background: #16213e;
+      border-radius: 12px 12px 0 0;
+      overflow: hidden;
+    }
+    .tab-btn {
+      flex: 1; padding: 16px; text-align: center;
+      border: none; background: #16213e; cursor: pointer;
+      font-size: 14px; font-weight: 600; color: #8899aa;
+      transition: all 0.2s; border-bottom: 3px solid transparent;
+      text-decoration: none; display: block;
+    }
+    .tab-btn:hover { color: #e0e0e0; }
+    .tab-btn.active {
+      color: #0f3460; border-bottom-color: #e94560;
+    }
+
+    .tab-content {
+      background: #16213e;
+      border-radius: 0 0 12px 12px;
+      padding: 30px;
+      display: none;
+    }
+    .tab-content.active { display: block; }
+
+    .card {
+      background: #0f3460;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 0;
+    }
+
+    .info-row {
+      display: flex; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid #1a1a2e;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-weight: 600; color: #8899aa; }
+    .info-value { color: #e0e0e0; }
+
+    h3 { color: #e0e0e0; margin-bottom: 16px; }
+    h3 i { margin-right: 8px; color: #e94560; }
+
+    table {
+      width: 100%; border-collapse: collapse;
+      color: #e0e0e0; font-size: 13px;
+    }
+    th {
+      text-align: left; padding: 12px 8px;
+      border-bottom: 2px solid #1a1a2e;
+      color: #8899aa; font-weight: 600; white-space: nowrap;
+    }
+    td {
+      padding: 12px 8px; border-bottom: 1px solid #1a1a2e;
+      white-space: nowrap;
+    }
+    tr:hover { background: rgba(255,255,255,0.03); }
+
+    .sort-link { color: #8899aa; text-decoration: none; }
+    .sort-link:hover { color: #e94560; }
+    .sort-arrow { font-size: 11px; margin-left: 4px; color: #e94560; }
+
+    .badge {
+      display: inline-block; padding: 3px 10px;
+      border-radius: 10px; font-size: 11px; font-weight: 600;
+    }
+    .badge-aktif, .badge-paid { background: #1b4332; color: #52b788; }
+    .badge-suspend, .badge-pending { background: #4a3000; color: #ffd60a; }
+    .badge-cancel { background: #4a0e0e; color: #e63946; }
+    .badge-user { background: #1d3557; color: #a8dadc; }
+    .badge-admin { background: #4a0e4a; color: #c77dff; }
+
+    .btn {
+      padding: 6px 14px; border: none; border-radius: 6px;
+      font-size: 13px; cursor: pointer; font-weight: 600;
+      transition: background 0.2s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-primary { background: #e94560; color: white; }
+    .btn-primary:hover { background: #d63851; }
+    .btn-warning { background: #ffd60a; color: #1a1a2e; }
+    .btn-warning:hover { background: #e6c400; }
+    .btn-danger { background: #e63946; color: white; }
+    .btn-danger:hover { background: #c1121f; }
+    .btn-cancel { background: #6c757d; color: white; }
+    .btn-cancel:hover { background: #5a6268; }
+    .btn-success { background: #2d6a4f; color: white; }
+    .btn-success:hover { background: #1b4332; }
+
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-bar input {
+      padding: 10px 14px; border: 1px solid #1a1a2e;
+      border-radius: 8px; font-size: 14px; outline: none;
+      background: #0f3460; color: #e0e0e0; flex: 1; min-width: 200px;
+    }
+    .filter-bar input:focus { border-color: #e94560; }
+    .filter-bar input::placeholder { color: #556677; }
+    .filter-bar button { flex-shrink: 0; }
+
+    .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-pill {
+      padding: 6px 16px; border: 1px solid #1a1a2e; border-radius: 20px;
+      background: #0f3460; color: #8899aa; font-size: 13px; font-weight: 600;
+      cursor: pointer; text-decoration: none; transition: all 0.2s;
+    }
+    .filter-pill:hover { background: #1a1a3e; color: #e0e0e0; }
+    .filter-pill.active { background: #e94560; color: white; border-color: #e94560; }
+
+    .pagination {
+      display: flex; justify-content: center; align-items: center;
+      gap: 6px; margin-top: 24px; flex-wrap: wrap;
+    }
+    .pagination a, .pagination span {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 40px; height: 40px; padding: 0 10px;
+      border: 1px solid #1a1a2e; border-radius: 8px;
+      background: #0f3460; color: #8899aa; font-size: 14px;
+      font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: all 0.2s;
+    }
+    .pagination a:hover { background: #1a1a3e; border-color: #e94560; color: #e94560; }
+    .pagination .active {
+      background: #e94560; color: white; border-color: #e94560; cursor: default;
+    }
+    .pagination .disabled {
+      background: #0a0a1a; color: #445566; cursor: not-allowed; border-color: #1a1a2e;
+    }
+    .pagination .dots { background: none; border: none; color: #556677; cursor: default; min-width: auto; }
+
+    .empty {
+      text-align: center; padding: 40px; color: #556677;
+    }
+    .empty i { font-size: 48px; margin-bottom: 16px; color: #1a1a2e; }
+
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); z-index: 1000;
+      justify-content: center; align-items: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #16213e; border-radius: 12px; padding: 30px;
+      width: 90%; max-width: 480px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    .modal h3 { margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .modal-actions button { flex: 1; padding: 12px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; margin-bottom: 6px; font-weight: 600;
+      color: #8899aa; font-size: 13px;
+    }
+    .form-group input, .form-group select {
+      width: 100%; padding: 12px 16px;
+      border: 1px solid #1a1a2e; border-radius: 8px;
+      font-size: 15px; background: #0f3460; color: #e0e0e0;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none; border-color: #e94560;
+    }
+    .form-group select { cursor: pointer; }
+    .form-group select option { background: #16213e; color: #e0e0e0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1><i class="fas fa-shield-alt" style="color:#e94560"></i> Admin Dashboard</h1>
+      <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="tabs">
+      <a href="?tab=info" class="tab-btn <%= activeTab === 'info' ? 'active' : '' %>">
+        <i class="fas fa-user"></i> Info Akun
+      </a>
+      <a href="?tab=security" class="tab-btn <%= activeTab === 'security' ? 'active' : '' %>">
+        <i class="fas fa-shield-alt"></i> Keamanan Akun
+      </a>
+      <a href="?tab=users" class="tab-btn <%= activeTab === 'users' ? 'active' : '' %>">
+        <i class="fas fa-users"></i> Manajemen Akun
+      </a>
+      <a href="?tab=orders" class="tab-btn <%= activeTab === 'orders' ? 'active' : '' %>">
+        <i class="fas fa-shopping-cart"></i> Manajemen Order
+      </a>
+    </div>
+
+    <!-- Tab: Info Akun -->
+    <div class="tab-content <%= activeTab === 'info' ? 'active' : '' %>">
+      <div class="card">
+        <h3><i class="fas fa-user-circle"></i> Detail Akun</h3>
+        <div class="info-row">
+          <span class="info-label">Nama</span>
+          <span class="info-value"><%= admin.name %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value"><%= admin.email %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">WhatsApp</span>
+          <span class="info-value"><%= admin.whatsapp || '-' %></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Role</span>
+          <span class="info-value"><span class="badge badge-admin">Admin</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Keamanan Akun -->
+    <div class="tab-content <%= activeTab === 'security' ? 'active' : '' %>">
+      <div class="card">
+        <h3><i class="fas fa-key"></i> Ubah Password</h3>
+        <form id="changePasswordForm" style="max-width: 400px;">
+          <div class="form-group">
+            <label for="newPassword">Password Baru</label>
+            <input type="password" id="newPassword" placeholder="Minimal 4 karakter" minlength="4" required>
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Konfirmasi Password</label>
+            <input type="password" id="confirmPassword" placeholder="Ketik ulang password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Simpan Password</button>
+          <div id="password-message" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:14px;color:#e0e0e0;"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tab: Manajemen Akun -->
+    <div class="tab-content <%= activeTab === 'users' ? 'active' : '' %>">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h3><i class="fas fa-users"></i> Data User</h3>
+          <button class="btn btn-primary btn-add-user"><i class="fas fa-plus"></i> Tambah User</button>
+        </div>
+
+        <form action="?tab=users" method="GET" style="margin-bottom:0;">
+          <input type="hidden" name="tab" value="users">
+          <div class="filter-bar">
+            <input type="text" name="search" placeholder="Cari nama, email, atau no WA..." value="<%= search %>">
+            <div class="filter-pills">
+              <% var statuses = [{v:'',l:'All'},{v:'aktif',l:'Aktif'},{v:'suspend',l:'Suspend'},{v:'cancel',l:'Cancel'}]; %>
+              <% statuses.forEach(function(s){ %>
+                <a href="?tab=users&search=<%= encodeURIComponent(search) %>&filter_status=<%= s.v %>&page=1" class="filter-pill <%= (filter_status || '') === s.v ? 'active' : '' %>"><%= s.l %></a>
+              <% }); %>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            <% if (search) { %>
+              <a href="?tab=users" class="btn btn-cancel"><i class="fas fa-times"></i></a>
+            <% } %>
+          </div>
+        </form>
+
+        <% if (users.length === 0) { %>
+          <div class="empty"><i class="fas fa-users"></i><br>Tidak ada data user</div>
+        <% } else { %>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>ID</th><th>Nama</th><th>Email</th><th>No. WA</th><th>Status</th><th>Role</th><th>Dibuat</th><th>Aksi</th></tr></thead>
+              <tbody>
+                <% users.forEach(function(u){ %>
+                  <tr>
+                    <td><%= u.id %></td>
+                    <td><%= u.nama %></td>
+                    <td><%= u.email %></td>
+                    <td><%= u.no_wa || '-' %></td>
+                    <td><span class="badge badge-<%= u.status %>"><%= u.status %></span></td>
+                    <td><span class="badge badge-<%= u.role %>"><%= u.role %></span></td>
+                    <td><%= u.created_at ? new Date(u.created_at).toLocaleDateString('id-ID', {year:'numeric',month:'short',day:'numeric'}) : '-' %></td>
+                    <td>
+                      <button class="btn btn-sm btn-warning btn-edit-user"
+                        data-user-id="<%= u.id %>"
+                        data-user-nama="<%= encodeURIComponent(u.nama) %>"
+                        data-user-email="<%= encodeURIComponent(u.email) %>"
+                        data-user-no-wa="<%= encodeURIComponent(u.no_wa || '') %>"
+                        data-user-status="<%= u.status %>"
+                        data-user-role="<%= u.role %>">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn btn-sm btn-danger btn-delete-user"
+                        data-user-id="<%= u.id %>"
+                        data-user-nama="<%= encodeURIComponent(u.nama) %>">
+                        <i class="fas fa-ban"></i>
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+
+          <% if (usersTotalPages > 1) { %>
+            <div class="pagination">
+              <% if (usersPage > 1) { %>
+                <a href="?tab=users&page=<%= usersPage - 1 %>&search=<%= encodeURIComponent(search) %>&filter_status=<%= filter_status %>">&laquo;</a>
+              <% } else { %>
+                <span class="disabled">&laquo;</span>
+              <% } %>
+              <% for (var i = 1; i <= usersTotalPages; i++) { %>
+                <% if (i === usersPage) { %>
+                  <span class="active"><%= i %></span>
+                <% } else if (i <= 3 || i > usersTotalPages - 3 || Math.abs(i - usersPage) <= 2) { %>
+                  <a href="?tab=users&page=<%= i %>&search=<%= encodeURIComponent(search) %>&filter_status=<%= filter_status %>"><%= i %></a>
+                <% } else if (i === 4 && usersPage > 4) { %>
+                  <span class="dots">...</span>
+                <% } %>
+              <% } %>
+              <% if (usersPage < usersTotalPages) { %>
+                <a href="?tab=users&page=<%= usersPage + 1 %>&search=<%= encodeURIComponent(search) %>&filter_status=<%= filter_status %>">&raquo;</a>
+              <% } else { %>
+                <span class="disabled">&raquo;</span>
+              <% } %>
+            </div>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Tab: Manajemen Order -->
+    <div class="tab-content <%= activeTab === 'orders' ? 'active' : '' %>">
+      <div class="card">
+        <h3><i class="fas fa-shopping-cart"></i> Data Order</h3>
+
+        <form action="?tab=orders" method="GET" style="margin-bottom:16px;">
+          <input type="hidden" name="tab" value="orders">
+          <div class="filter-bar">
+            <input type="text" name="search" placeholder="Cari invoice, produk, atau nama..." value="<%= search %>">
+            <div class="filter-pills">
+              <% var orderStatuses = [{v:'',l:'All'},{v:'pending',l:'Pending'},{v:'paid',l:'Lunas'},{v:'cancel',l:'Cancel'}]; %>
+              <% orderStatuses.forEach(function(s){ %>
+                <a href="?tab=orders&search=<%= encodeURIComponent(search) %>&filter_order_status=<%= s.v %>&sort_by=<%= sort_by %>&sort_dir=<%= sort_dir %>&page=1" class="filter-pill <%= (filter_order_status || '') === s.v ? 'active' : '' %>"><%= s.l %></a>
+              <% }); %>
+            </div>
+            <input type="hidden" name="sort_by" value="<%= sort_by %>">
+            <input type="hidden" name="sort_dir" value="<%= sort_dir %>">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            <% if (search) { %>
+              <a href="?tab=orders" class="btn btn-cancel"><i class="fas fa-times"></i></a>
+            <% } %>
+          </div>
+        </form>
+
+        <% if (orders.length === 0) { %>
+          <div class="empty"><i class="fas fa-inbox"></i><br>Tidak ada data order</div>
+        <% } else { %>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <%
+                    function sortUrlOrders(col) {
+                      var dir = sort_by === col ? (sort_dir === 'ASC' ? 'DESC' : 'ASC') : 'DESC';
+                      return '?tab=orders&search=' + encodeURIComponent(search) + '&sort_by=' + col + '&sort_dir=' + dir + '&filter_order_status=' + (filter_order_status || '') + '&page=1';
+                    }
+                    function sortArrow(col) {
+                      if (sort_by !== col) return '';
+                      return '<span class="sort-arrow">' + (sort_dir === 'ASC' ? '&#9650;' : '&#9660;') + '</span>';
+                    }
+                  %>
+                  <th><a href="<%= sortUrlOrders('invoice') %>" class="sort-link">Invoice<%- sortArrow('invoice') %></a></th>
+                  <th>Pelanggan</th>
+                  <th>Produk</th>
+                  <th>Qty</th>
+                  <th><a href="<%= sortUrlOrders('total') %>" class="sort-link">Total<%- sortArrow('total') %></a></th>
+                  <th><a href="<%= sortUrlOrders('status') %>" class="sort-link">Status<%- sortArrow('status') %></a></th>
+                  <th><a href="<%= sortUrlOrders('tanggal') %>" class="sort-link">Tanggal<%- sortArrow('tanggal') %></a></th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% orders.forEach(function(o){ %>
+                  <tr>
+                    <td><%= o.invoice %></td>
+                    <td><%= o.account_name %><br><small style="color:#8899aa"><%= o.account_email %></small></td>
+                    <td><%= o.product_name %></td>
+                    <td><%= o.qty %></td>
+                    <td>Rp <%= Number(o.total).toLocaleString('id-ID') %></td>
+                    <td><span class="badge badge-<%= o.status %>"><%= o.status === 'pending' ? 'Pending' : o.status === 'paid' ? 'Lunas' : 'Cancel' %></span></td>
+                    <td><%= new Date(o.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></td>
+                    <td>
+                      <% if (o.status === 'pending') { %>
+                        <form class="form-update-order" style="display:inline;">
+                          <input type="hidden" name="order_id" value="<%= o.id %>">
+                          <input type="hidden" name="new_status" value="paid">
+                          <button type="button" class="btn btn-sm btn-success btn-confirm-payment"
+                            data-order-id="<%= o.id %>"
+                            data-order-invoice="<%= encodeURIComponent(o.invoice) %>">
+                            <i class="fas fa-check"></i>
+                          </button>
+                        </form>
+                        <form class="form-update-order" style="display:inline;">
+                          <input type="hidden" name="order_id" value="<%= o.id %>">
+                          <input type="hidden" name="new_status" value="cancel">
+                          <button type="button" class="btn btn-sm btn-danger btn-cancel-order"
+                            data-order-id="<%= o.id %>"
+                            data-order-invoice="<%= encodeURIComponent(o.invoice) %>">
+                            <i class="fas fa-times"></i>
+                          </button>
+                        </form>
+                      <% } else { %>
+                        <span style="color:#556677;">-</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+
+          <% if (ordersTotalPages > 1) { %>
+            <div class="pagination">
+              <% if (ordersPage > 1) { %>
+                <a href="?tab=orders&page=<%= ordersPage - 1 %>&search=<%= encodeURIComponent(search) %>&sort_by=<%= sort_by %>&sort_dir=<%= sort_dir %>&filter_order_status=<%= filter_order_status %>">&laquo;</a>
+              <% } else { %>
+                <span class="disabled">&laquo;</span>
+              <% } %>
+              <% for (var i = 1; i <= ordersTotalPages; i++) { %>
+                <% if (i === ordersPage) { %>
+                  <span class="active"><%= i %></span>
+                <% } else if (i <= 3 || i > ordersTotalPages - 3 || Math.abs(i - ordersPage) <= 2) { %>
+                  <a href="?tab=orders&page=<%= i %>&search=<%= encodeURIComponent(search) %>&sort_by=<%= sort_by %>&sort_dir=<%= sort_dir %>&filter_order_status=<%= filter_order_status %>"><%= i %></a>
+                <% } else if (i === 4 && ordersPage > 4) { %>
+                  <span class="dots">...</span>
+                <% } %>
+              <% } %>
+              <% if (ordersPage < ordersTotalPages) { %>
+                <a href="?tab=orders&page=<%= ordersPage + 1 %>&search=<%= encodeURIComponent(search) %>&sort_by=<%= sort_by %>&sort_dir=<%= sort_dir %>&filter_order_status=<%= filter_order_status %>">&raquo;</a>
+              <% } else { %>
+                <span class="disabled">&raquo;</span>
+              <% } %>
+            </div>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create User Modal -->
+  <div class="modal-overlay" id="createUserModal">
+    <div class="modal">
+      <h3><i class="fas fa-plus-circle"></i> Tambah User</h3>
+      <form id="createUserForm">
+        <div class="form-group"><label>Nama</label><input type="text" id="createNama" required></div>
+        <div class="form-group"><label>Email</label><input type="email" id="createEmail" required></div>
+        <div class="form-group"><label>No. WhatsApp</label><input type="text" id="createNoWa" placeholder="08xxxxxxxxxx"></div>
+        <div id="createUserMessage" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel btn-cancel-modal">Batal</button>
+          <button type="submit" class="btn btn-primary" id="createUserBtn">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div class="modal-overlay" id="editUserModal">
+    <div class="modal">
+      <h3><i class="fas fa-edit"></i> Edit User</h3>
+      <form id="editUserForm">
+        <input type="hidden" id="editUserId">
+        <div class="form-group"><label>Nama</label><input type="text" id="editNama" required></div>
+        <div class="form-group"><label>Email</label><input type="email" id="editEmail" required></div>
+        <div class="form-group"><label>No. WhatsApp</label><input type="text" id="editNoWa"></div>
+        <div class="form-group"><label>Status</label>
+          <select id="editStatus">
+            <option value="aktif">Aktif</option>
+            <option value="suspend">Suspend</option>
+            <option value="cancel">Cancel</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Role</label>
+          <select id="editRole">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div id="editUserMessage" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel btn-cancel-modal">Batal</button>
+          <button type="submit" class="btn btn-primary" id="editUserBtn">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal-overlay" id="deleteUserModal">
+    <div class="modal">
+      <h3><i class="fas fa-exclamation-triangle" style="color:#e63946"></i> Konfirmasi</h3>
+      <p style="color:#e0e0e0;margin-bottom:20px;" id="deleteUserText"></p>
+      <form id="deleteUserForm">
+        <input type="hidden" id="deleteUserId">
+        <div id="deleteUserMessage" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel btn-cancel-modal">Batal</button>
+          <button type="submit" class="btn btn-danger" id="deleteUserBtn">Nonaktifkan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // === Change Password ===
+    document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const msg = document.getElementById('password-message');
+      const btn = this.querySelector('button[type="submit"]');
+
+      msg.style.display = 'none';
+
+      if (newPassword !== confirmPassword) {
+        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Password tidak cocok!'; return;
+      }
+      if (newPassword.length < 4) {
+        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Password minimal 4 karakter!'; return;
+      }
+
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+      try {
+        const response = await fetch('/process_change_password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: newPassword }),
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+          msg.style.display = 'block'; msg.style.background = '#1b4332'; msg.textContent = 'Password berhasil diubah!';
+          document.getElementById('newPassword').value = '';
+          document.getElementById('confirmPassword').value = '';
+        } else {
+          msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = data.message || 'Gagal ubah password';
+        }
+      } catch (error) {
+        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+      } finally {
+        btn.disabled = false; btn.textContent = 'Simpan Password';
+      }
+    });
+
+    // === Modal helpers ===
+    function showModal(id) { document.getElementById(id).classList.add('show'); }
+    function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(function(m) {
+      m.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+    });
+
+    // === Create User ===
+    document.querySelector('.btn-add-user').addEventListener('click', function() {
+      document.getElementById('createNama').value = '';
+      document.getElementById('createEmail').value = '';
+      document.getElementById('createNoWa').value = '';
+      document.getElementById('createUserMessage').style.display = 'none';
+      showModal('createUserModal');
+    });
+
+    document.getElementById('createUserForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const nama = document.getElementById('createNama').value.trim();
+      const email = document.getElementById('createEmail').value.trim();
+      const no_wa = document.getElementById('createNoWa').value.trim();
+      const msg = document.getElementById('createUserMessage');
+      const btn = document.getElementById('createUserBtn');
+
+      msg.style.display = 'none';
+
+      if (!nama || !email) {
+        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Nama dan email wajib diisi!'; return;
+      }
+
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+      try {
+        const response = await fetch('/users/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nama, email, no_wa }),
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+          msg.style.display = 'block'; msg.style.background = '#1b4332'; msg.textContent = 'User berhasil ditambahkan!';
+          setTimeout(function() { location.reload(); }, 1500);
+        } else {
+          msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = data.message || 'Gagal menambah user';
+          btn.disabled = false; btn.textContent = 'Simpan';
+        }
+      } catch (error) {
+        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+        btn.disabled = false; btn.textContent = 'Simpan';
+      }
+    });
+
+    // === Edit User ===
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.btn-edit-user');
+      if (btn) {
+        document.getElementById('editUserId').value = btn.getAttribute('data-user-id');
+        document.getElementById('editNama').value = decodeURIComponent(btn.getAttribute('data-user-nama'));
+        document.getElementById('editEmail').value = decodeURIComponent(btn.getAttribute('data-user-email'));
+        document.getElementById('editNoWa').value = decodeURIComponent(btn.getAttribute('data-user-no-wa'));
+        document.getElementById('editStatus').value = btn.getAttribute('data-user-status');
+        document.getElementById('editRole').value = btn.getAttribute('data-user-role');
+        document.getElementById('editUserMessage').style.display = 'none';
+        showModal('editUserModal');
+      }
+    });
+
+    document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const id = document.getElementById('editUserId').value;
+      const nama = document.getElementById('editNama').value.trim();
+      const email = document.getElementById('editEmail').value.trim();
+      const no_wa = document.getElementById('editNoWa').value.trim();
+      const status = document.getElementById('editStatus').value;
+      const role = document.getElementById('editRole').value;
+      const msg = document.getElementById('editUserMessage');
+      const btn = document.getElementById('editUserBtn');
+
+      msg.style.display = 'none';
+
+      if (!nama || !email) {
+        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Nama dan email wajib diisi!'; return;
+      }
+
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+      try {
+        const response = await fetch('/users/' + id + '/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nama, email, no_wa, status, role }),
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+          msg.style.display = 'block'; msg.style.background = '#1b4332'; msg.textContent = 'User berhasil diperbarui!';
+          setTimeout(function() { location.reload(); }, 1500);
+        } else {
+          msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = data.message || 'Gagal memperbarui user';
+          btn.disabled = false; btn.textContent = 'Simpan';
+        }
+      } catch (error) {
+        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+        btn.disabled = false; btn.textContent = 'Simpan';
+      }
+    });
+
+    // === Delete User ===
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.btn-delete-user');
+      if (btn) {
+        document.getElementById('deleteUserId').value = btn.getAttribute('data-user-id');
+        var nama = decodeURIComponent(btn.getAttribute('data-user-nama'));
+        document.getElementById('deleteUserText').textContent = 'Nonaktifkan user "' + nama + '"?';
+        document.getElementById('deleteUserMessage').style.display = 'none';
+        showModal('deleteUserModal');
+      }
+    });
+
+    document.getElementById('deleteUserForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const id = document.getElementById('deleteUserId').value;
+      const msg = document.getElementById('deleteUserMessage');
+      const btn = document.getElementById('deleteUserBtn');
+
+      msg.style.display = 'none';
+      btn.disabled = true; btn.textContent = 'Memproses...';
+
+      try {
+        const response = await fetch('/users/' + id + '/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+          msg.style.display = 'block'; msg.style.background = '#1b4332'; msg.textContent = 'User berhasil dinonaktifkan!';
+          setTimeout(function() { location.reload(); }, 1500);
+        } else {
+          msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = data.message || 'Gagal menonaktifkan user';
+          btn.disabled = false; btn.textContent = 'Nonaktifkan';
+        }
+      } catch (error) {
+        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+        btn.disabled = false; btn.textContent = 'Nonaktifkan';
+      }
+    });
+
+    // === Cancel modal buttons ===
+    document.querySelectorAll('.btn-cancel-modal').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        this.closest('.modal-overlay').classList.remove('show');
+      });
+    });
+
+    // === Update Order Status ===
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.btn-confirm-payment');
+      if (btn) {
+        var orderId = btn.getAttribute('data-order-id');
+        var invoice = decodeURIComponent(btn.getAttribute('data-order-invoice'));
+        if (confirm('Konfirmasi pembayaran untuk ' + invoice + '?')) {
+          updateOrderStatus(orderId, 'paid');
+        }
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.btn-cancel-order');
+      if (btn) {
+        var orderId = btn.getAttribute('data-order-id');
+        var invoice = decodeURIComponent(btn.getAttribute('data-order-invoice'));
+        if (confirm('Cancel order ' + invoice + '?')) {
+          updateOrderStatus(orderId, 'cancel');
+        }
+      }
+    });
+
+    async function updateOrderStatus(orderId, newStatus) {
+      try {
+        const response = await fetch('/orders/' + orderId + '/update-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus }),
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+          location.reload();
+        } else {
+          alert(data.message || 'Gagal mengubah status');
+        }
+      } catch (error) {
+        alert('Terjadi kesalahan. Silakan coba lagi.');
+      }
+    }
+  </script>
+</body>
+</html>
