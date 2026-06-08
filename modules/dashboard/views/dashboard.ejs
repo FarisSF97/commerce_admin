@@ -509,8 +509,11 @@
       <div id="resetSuccessSection" style="display:none;">
         <h3><i class="fas fa-check-circle" style="color:#4caf50;"></i> Password Berhasil Direset</h3>
         <p style="margin:16px 0;font-size:13px;color:#999;">Catat password baru berikut. Password hanya ditampilkan satu kali.</p>
-        <div style="background:#1b4332;border:2px dashed #4caf50;border-radius:8px;padding:20px;text-align:center;margin:16px 0;">
+        <div style="background:#1b4332;border:2px dashed #4caf50;border-radius:8px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin:16px 0;">
           <div style="font-size:24px;font-weight:700;color:#fff;letter-spacing:2px;font-family:monospace;" id="resetNewPassword"></div>
+          <button onclick="copyPassword()" style="background:transparent;border:1px solid #4caf50;color:#4caf50;border-radius:6px;padding:8px 12px;cursor:pointer;font-size:18px;flex-shrink:0;margin-left:12px;" title="Salin password">
+            <i class="fas fa-copy" id="copyIcon"></i>
+          </button>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-primary" id="resetDoneBtn">Tutup</button>
@@ -818,6 +821,28 @@
       } catch (error) {
         alert('Terjadi kesalahan. Silakan coba lagi.');
       }
+    }
+
+    function copyPassword() {
+      var pwd = document.getElementById('resetNewPassword').textContent;
+      if (!pwd) return;
+      navigator.clipboard.writeText(pwd).then(function() {
+        var icon = document.getElementById('copyIcon');
+        icon.classList.remove('fa-copy');
+        icon.classList.add('fa-check');
+        setTimeout(function() {
+          icon.classList.remove('fa-check');
+          icon.classList.add('fa-copy');
+        }, 2000);
+      }).catch(function() {
+        var icon = document.getElementById('copyIcon');
+        icon.classList.remove('fa-copy');
+        icon.classList.add('fa-check');
+        setTimeout(function() {
+          icon.classList.remove('fa-check');
+          icon.classList.add('fa-copy');
+        }, 2000);
+      });
     }
   </script>
 </body>
