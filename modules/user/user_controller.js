@@ -59,6 +59,27 @@ const user = {
     }
   },
 
+  resetPassword: async (req, res) => {
+    if (!req.session.admin) {
+      return res.status(401).json({ status: 'failed', message: 'Unauthorized' });
+    }
+
+    try {
+      const apiResponse = await axios.put(`${API_BASE_URL}/admin/users/${req.params.id}/password`, {
+        admin_id: req.session.admin.id,
+        password: req.body.password
+      }, { withCredentials: true });
+
+      return res.json(apiResponse.data);
+    } catch (error) {
+      console.error('Reset password error:', error);
+      return res.status(error.response?.status || 500).json({
+        status: 'failed',
+        message: error.response?.data?.message || 'Gagal mereset password'
+      });
+    }
+  },
+
   update: async (req, res) => {
     if (!req.session.admin) {
       return res.status(401).json({ status: 'failed', message: 'Unauthorized' });

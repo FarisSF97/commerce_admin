@@ -316,6 +316,11 @@
                         data-user-role="<%= u.role %>">
                         <i class="fas fa-edit"></i>
                       </button>
+                      <button class="btn btn-sm btn-danger btn-reset-user"
+                        data-user-id="<%= u.id %>"
+                        data-user-nama="<%= encodeURIComponent(u.nama) %>">
+                        <i class="fas fa-key"></i>
+                      </button>
                     </td>
                   </tr>
                 <% }); %>
@@ -485,6 +490,32 @@
           <button type="submit" class="btn btn-primary" id="createUserBtn">Simpan</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal -->
+  <div class="modal-overlay" id="resetPasswordModal">
+    <div class="modal">
+      <div id="resetConfirmSection">
+        <h3><i class="fas fa-key"></i> Reset Password User</h3>
+        <p style="margin:16px 0;font-size:14px;color:#ccc;">Yakin ingin reset password untuk user <strong id="resetUserName" style="color:#fff;"></strong>?</p>
+        <p style="margin-bottom:16px;font-size:13px;color:#999;">Password baru akan dibuat secara acak dan ditampilkan satu kali setelah reset.</p>
+        <div id="resetMessage" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel btn-cancel-modal">Batal</button>
+          <button type="button" class="btn btn-danger" id="resetConfirmBtn">Ya, Reset</button>
+        </div>
+      </div>
+      <div id="resetSuccessSection" style="display:none;">
+        <h3><i class="fas fa-check-circle" style="color:#4caf50;"></i> Password Berhasil Direset</h3>
+        <p style="margin:16px 0;font-size:13px;color:#999;">Catat password baru berikut. Password hanya ditampilkan satu kali.</p>
+        <div style="background:#1b4332;border:2px dashed #4caf50;border-radius:8px;padding:20px;text-align:center;margin:16px 0;">
+          <div style="font-size:24px;font-weight:700;color:#fff;letter-spacing:2px;font-family:monospace;" id="resetNewPassword"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-primary" id="resetDoneBtn">Tutup</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -688,6 +719,63 @@
       btn.addEventListener('click', function() {
         this.closest('.modal-overlay').classList.remove('show');
       });
+    });
+
+    // === Reset Password ===
+    var resetUserId = null;
+
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.btn-reset-user');
+      if (btn) {
+        resetUserId = btn.getAttribute('data-user-id');
+        var nama = decodeURIComponent(btn.getAttribute('data-user-nama'));
+        document.getElementById('resetUserName').textContent = nama;
+        document.getElementById('resetConfirmSection').style.display = 'block';
+        document.getElementById('resetSuccessSection').style.display = 'none';
+        document.getElementById('resetMessage').style.display = 'none';
+        showModal('resetPasswordModal');
+      }
+    });
+
+    document.getElementById('resetConfirmBtn').addEventListener('click', async function() {
+      if (!resetUserId) return;
+      var msg = document.getElementById('resetMessage');
+      var btn = document.getElementById('resetConfirmBtn');
+      msg.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Memproses...';
+
+      var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      var newPassword = '';
+      for (var i = 0; i < 8; i++) {
+        newPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+
+      try {
+        const response = await fetch('/users/' + resetUserId + '/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: newPassword }),
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+          document.getElementById('resetConfirmSection').style.display = 'none';
+          document.getElementById('resetNewPassword').textContent = newPassword;
+          document.getElementById('resetSuccessSection').style.display = 'block';
+        } else {
+          msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = data.message || 'Gagal mereset password';
+          btn.disabled = false; btn.textContent = 'Ya, Reset';
+        }
+      } catch (error) {
+        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+        btn.disabled = false; btn.textContent = 'Ya, Reset';
+      }
+    });
+
+    document.getElementById('resetDoneBtn').addEventListener('click', function() {
+      hideModal('resetPasswordModal');
+      location.reload();
     });
 
     // === Update Order Status ===
