@@ -296,11 +296,11 @@
         <% } else { %>
           <div style="overflow-x:auto;">
             <table>
-              <thead><tr><th>ID</th><th>Nama</th><th>Email</th><th>No. WA</th><th>Status</th><th>Role</th><th>Tanggal Daftar</th><th>Aksi</th></tr></thead>
+              <thead><tr><th>#</th><th>Nama</th><th>Email</th><th>No. WA</th><th>Status</th><th>Role</th><th>Tanggal Daftar</th><th>Aksi</th></tr></thead>
               <tbody>
-                <% users.forEach(function(u){ %>
+                <% users.forEach(function(u, index){ %>
                   <tr>
-                    <td><%= u.id %></td>
+                    <td><%= (usersPage - 1) * 10 + (index + 1) %></td>
                     <td><%= u.nama %></td>
                     <td><%= u.email %></td>
                     <td><%= u.no_wa || '-' %></td>
