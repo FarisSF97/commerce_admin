@@ -44,9 +44,9 @@
       text-decoration: none; display: block;
     }
     .tab-btn:hover { color: #e0e0e0; }
-    .tab-btn.active {
-      color: #0f3460; border-bottom-color: #e94560;
-    }
+.tab-btn.active {
+  color: #ffffff; background: #0f3460; border-bottom-color: #e94560;
+}
 
     .tab-content {
       background: #16213e;
@@ -550,7 +550,7 @@
       msg.style.display = 'none';
 
       if (newPassword !== confirmPassword) {
-        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Password tidak cocok!'; return;
+        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Password tidak sama!'; return;
       }
       if (newPassword.length < 4) {
         msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Password minimal 4 karakter!'; return;
