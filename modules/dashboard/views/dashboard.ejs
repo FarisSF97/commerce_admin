@@ -178,6 +178,7 @@
     .modal {
       background: #16213e; border-radius: 12px; padding: 30px;
       width: 90%; max-width: 480px;
+      max-height: 85vh; overflow-y: auto;
       box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     }
     .modal h3 { margin-bottom: 20px; }
@@ -422,7 +423,7 @@
                           Detail
                         </button>
                         <button type="button" class="btn btn-sm btn-warning btn-edit-order"
-                          data-order='<%= encodeURIComponent(JSON.stringify(o)) %>'>
+                          data-order-id="<%= o.id %>">
                           <i class="fas fa-edit"></i>
                         </button>
                       <% if (o.status === 'pending') { %>
@@ -557,24 +558,65 @@
 
   <!-- Edit Order Modal -->
   <div class="modal-overlay" id="editOrderModal">
-    <div class="modal">
+    <div class="modal" style="max-width:650px;">
       <h3><i class="fas fa-edit"></i> Edit Order</h3>
       <form id="editOrderForm">
         <input type="hidden" id="editOrderId">
-        <div class="form-group"><label>Invoice</label><input type="text" id="editOrderInvoice" readonly style="background:#2a2a4a;color:#8899aa;cursor:not-allowed;"></div>
-        <div class="form-group"><label>Pelanggan</label><input type="text" id="editOrderCustomer" readonly style="background:#2a2a4a;color:#8899aa;cursor:not-allowed;"></div>
-        <div class="form-group"><label>Status Saat Ini</label><input type="text" id="editOrderCurrentStatus" readonly style="background:#2a2a4a;color:#8899aa;cursor:not-allowed;"></div>
-        <div class="form-group"><label>Ubah Status</label>
-          <select id="editOrderStatus" required>
-            <option value="pending">Pending</option>
-            <option value="paid">Lunas</option>
-            <option value="cancel">Cancel</option>
-          </select>
-        </div>
-        <div id="editOrderMessage" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;"></div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-cancel btn-cancel-modal">Batal</button>
-          <button type="submit" class="btn btn-primary" id="editOrderBtn">Simpan</button>
+        <div id="editOrderLoading" style="text-align:center;padding:20px;color:#8899aa;">Memuat data...</div>
+        <div id="editOrderFormBody" style="display:none;">
+          <table class="detail-table" style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;">
+            <tr><td style="padding:6px 12px;color:#8899aa;width:140px;">Invoice</td>
+                <td style="padding:6px 12px;"><input type="text" id="editInvoice" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Tanggal</td>
+                <td style="padding:6px 12px;"><input type="date" id="editTanggal" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Status</td>
+                <td style="padding:6px 12px;">
+                  <select id="editStatus" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
+                    <option value="pending">Pending</option>
+                    <option value="paid">Lunas</option>
+                    <option value="cancel">Cancel</option>
+                  </select></td></tr>
+            <tr><td colspan="2" style="padding:8px;border-bottom:1px solid #2a2a4a;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Pelanggan</td>
+                <td style="padding:6px 12px;">
+                  <select id="editPelanggan" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
+                    <option value="">— Pilih Pelanggan —</option>
+                  </select></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Email</td><td style="padding:6px 12px;"><input type="text" id="editEmail" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">No. WA</td><td style="padding:6px 12px;"><input type="text" id="editWa" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td colspan="2" style="padding:8px;border-bottom:1px solid #2a2a4a;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Produk</td>
+                <td style="padding:6px 12px;">
+                  <select id="editProduk" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
+                    <option value="">— Pilih Produk —</option>
+                  </select></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Harga</td><td style="padding:6px 12px;"><input type="text" id="editHarga" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Jumlah</td><td style="padding:6px 12px;"><input type="number" id="editJumlah" min="1" value="1" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Subtotal</td><td style="padding:6px 12px;"><input type="text" id="editSubtotal" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td colspan="2" style="padding:8px;border-bottom:1px solid #2a2a4a;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Kode Voucher</td>
+                <td style="padding:6px 12px;">
+                  <select id="editKupon" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
+                    <option value="">— Pilih Kupon —</option>
+                  </select></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Potongan</td><td style="padding:6px 12px;"><input type="text" id="editPotongan" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#4caf50;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Kode Unik</td><td style="padding:6px 12px;"><input type="text" id="editKodeUnik" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#ff9800;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td colspan="2" style="padding:8px;border-bottom:1px solid #2a2a4a;"></td></tr>
+            <tr><td style="padding:8px 12px;color:#8899aa;font-weight:700;">Total</td><td style="padding:8px 12px;color:#fff;font-weight:700;font-size:16px;" id="editTotalDisplay">Rp 0</td></tr>
+            <tr><td colspan="2" style="padding:8px;border-bottom:1px solid #2a2a4a;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Pembayaran</td>
+                <td style="padding:6px 12px;">
+                  <select id="editBank" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
+                    <option value="">— Pilih Pembayaran —</option>
+                  </select></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">No. Rekening</td><td style="padding:6px 12px;"><input type="text" id="editRekening" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Atas Nama</td><td style="padding:6px 12px;"><input type="text" id="editRekeningOwner" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+          </table>
+          <div id="editOrderMessage" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;"></div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-cancel btn-cancel-modal">Batal</button>
+            <button type="submit" class="btn btn-primary" id="editOrderBtn">Simpan</button>
+          </div>
         </div>
       </form>
     </div>
@@ -891,50 +933,214 @@
     });
 
     // === Edit Order ===
+    var editOrderData = null;
+
     document.addEventListener('click', function(e) {
       var btn = e.target.closest('.btn-edit-order');
       if (btn) {
-        var o = JSON.parse(decodeURIComponent(btn.getAttribute('data-order')));
-        document.getElementById('editOrderId').value = o.id;
-        document.getElementById('editOrderInvoice').value = o.invoice || '-';
-        document.getElementById('editOrderCustomer').value = o.account_name || '-';
-        var statusLabel = o.status === 'pending' ? 'Pending' : o.status === 'paid' ? 'Lunas' : 'Cancel';
-        document.getElementById('editOrderCurrentStatus').value = statusLabel;
-        document.getElementById('editOrderStatus').value = o.status;
+        var orderId = btn.getAttribute('data-order-id');
+        document.getElementById('editOrderId').value = orderId;
+        document.getElementById('editOrderFormBody').style.display = 'none';
+        document.getElementById('editOrderLoading').style.display = 'block';
         document.getElementById('editOrderMessage').style.display = 'none';
         showModal('editOrderModal');
+
+        fetch('/orders/' + orderId + '/edit-data', { credentials: 'include' })
+          .then(function(r) { return r.json(); })
+          .then(function(res) {
+            if (res.status !== 'success') {
+              document.getElementById('editOrderLoading').textContent = 'Gagal memuat data: ' + (res.message || 'unknown');
+              return;
+            }
+            var d = res.data;
+            editOrderData = d;
+            populateEditForm(d);
+            document.getElementById('editOrderLoading').style.display = 'none';
+            document.getElementById('editOrderFormBody').style.display = 'block';
+          })
+          .catch(function(err) {
+            document.getElementById('editOrderLoading').textContent = 'Terjadi kesalahan saat memuat data.';
+          });
       }
     });
 
+    function populateEditForm(d) {
+      var order = d.order;
+      var users = d.users || [];
+      var products = d.products || [];
+      var kupon = d.kupon || [];
+      var banks = d.banks || [];
+
+      document.getElementById('editInvoice').value = order.invoice || '';
+      if (order.created_at) {
+        var dt = new Date(order.created_at);
+        document.getElementById('editTanggal').value = dt.toISOString().slice(0, 10);
+      }
+      document.getElementById('editStatus').value = order.status || 'pending';
+
+      var pelSelect = document.getElementById('editPelanggan');
+      pelSelect.innerHTML = '<option value="">— Pilih Pelanggan —</option>';
+      users.forEach(function(u) {
+        pelSelect.innerHTML += '<option value="' + u.id + '">' + escHtml(u.nama) + ' (' + escHtml(u.email) + ')</option>';
+      });
+      pelSelect.value = order.account_id || '';
+
+      var proSelect = document.getElementById('editProduk');
+      proSelect.innerHTML = '<option value="">— Pilih Produk —</option>';
+      products.forEach(function(p) {
+        proSelect.innerHTML += '<option value="' + p.id + '" data-harga="' + p.harga + '" data-kodeunik="' + (p.kode_unik || 0) + '">' + escHtml(p.nama) + '</option>';
+      });
+      proSelect.value = order.products_id || '';
+
+      document.getElementById('editJumlah').value = order.qty || 1;
+
+      var kupSelect = document.getElementById('editKupon');
+      kupSelect.innerHTML = '<option value="">— Pilih Kupon —</option>';
+      kupon.forEach(function(k) {
+        kupSelect.innerHTML += '<option value="' + k.id + '" data-potongan="' + (k.potongan || 0) + '">' + escHtml(k.kode) + '</option>';
+      });
+      kupSelect.value = order.kupon_id || '';
+
+      var bankSelect = document.getElementById('editBank');
+      bankSelect.innerHTML = '<option value="">— Pilih Pembayaran —</option>';
+      banks.forEach(function(b) {
+        bankSelect.innerHTML += '<option value="' + b.id + '" data-rek="' + escHtml(b.no_rek || '') + '" data-owner="' + escHtml(b.atas_nama || '') + '">' + escHtml(b.jenis_bank) + '</option>';
+      });
+      bankSelect.value = order.bank_id || '';
+
+      // Trigger events to populate auto-fill fields
+      triggerEvent(pelSelect, 'change');
+      triggerEvent(proSelect, 'change');
+      triggerEvent(kupSelect, 'change');
+      triggerEvent(bankSelect, 'change');
+      triggerEvent(document.getElementById('editJumlah'), 'input');
+    }
+
+    function escHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function triggerEvent(el, type) {
+      var evt = new Event(type, { bubbles: true });
+      el.dispatchEvent(evt);
+    }
+
+    function editOrderCalc() {
+      var harga = parseInt(document.getElementById('editHarga').value.replace(/[^0-9]/g, '')) || 0;
+      var qty = parseInt(document.getElementById('editJumlah').value) || 0;
+      var potongan = parseInt(document.getElementById('editPotongan').value.replace(/[^0-9]/g, '')) || 0;
+      var kodeUnik = parseInt(document.getElementById('editKodeUnik').value.replace(/[^0-9]/g, '')) || 0;
+      var subtotal = harga * qty;
+      var total = subtotal - potongan - kodeUnik;
+      if (total < 0) total = 0;
+      document.getElementById('editSubtotal').value = 'Rp ' + subtotal.toLocaleString('id-ID');
+      document.getElementById('editTotalDisplay').textContent = 'Rp ' + total.toLocaleString('id-ID');
+    }
+
+    // Pelanggan change → auto-fill Email & WA
+    document.getElementById('editPelanggan').addEventListener('change', function() {
+      var val = this.value;
+      var user = null;
+      if (editOrderData && editOrderData.users) {
+        editOrderData.users.forEach(function(u) {
+          if (String(u.id) === String(val)) user = u;
+        });
+      }
+      document.getElementById('editEmail').value = user ? user.email : '';
+      document.getElementById('editWa').value = user ? user.no_wa : '';
+    });
+
+    // Produk change → auto-fill Harga & Kode Unik → recalc
+    document.getElementById('editProduk').addEventListener('change', function() {
+      var sel = this.options[this.selectedIndex];
+      var harga = sel ? parseInt(sel.getAttribute('data-harga')) || 0 : 0;
+      var kodeUnik = sel ? parseInt(sel.getAttribute('data-kodeunik')) || 0 : 0;
+      document.getElementById('editHarga').value = 'Rp ' + harga.toLocaleString('id-ID');
+      document.getElementById('editKodeUnik').value = 'Rp ' + kodeUnik.toLocaleString('id-ID');
+      editOrderCalc();
+    });
+
+    // Jumlah change → recalc
+    document.getElementById('editJumlah').addEventListener('input', function() {
+      editOrderCalc();
+    });
+
+    // Kupon change → auto-fill Potongan → recalc
+    document.getElementById('editKupon').addEventListener('change', function() {
+      var sel = this.options[this.selectedIndex];
+      var potongan = sel ? parseInt(sel.getAttribute('data-potongan')) || 0 : 0;
+      document.getElementById('editPotongan').value = 'Rp ' + potongan.toLocaleString('id-ID');
+      editOrderCalc();
+    });
+
+    // Bank change → auto-fill No. Rekening & Atas Nama
+    document.getElementById('editBank').addEventListener('change', function() {
+      var sel = this.options[this.selectedIndex];
+      document.getElementById('editRekening').value = sel ? sel.getAttribute('data-rek') : '';
+      document.getElementById('editRekeningOwner').value = sel ? sel.getAttribute('data-owner') : '';
+    });
+
+    // Submit
     document.getElementById('editOrderForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       var orderId = document.getElementById('editOrderId').value;
-      var newStatus = document.getElementById('editOrderStatus').value;
       var btn = document.getElementById('editOrderBtn');
-      btn.disabled = true;
-      btn.textContent = 'Menyimpan...';
+      var em = document.getElementById('editOrderMessage');
+      em.style.display = 'none';
+
+      var hargaRaw = parseInt(document.getElementById('editHarga').value.replace(/[^0-9]/g, '')) || 0;
+      var qty = parseInt(document.getElementById('editJumlah').value) || 0;
+      var potonganRaw = parseInt(document.getElementById('editPotongan').value.replace(/[^0-9]/g, '')) || 0;
+      var kodeUnikRaw = parseInt(document.getElementById('editKodeUnik').value.replace(/[^0-9]/g, '')) || 0;
+      var subtotal = hargaRaw * qty;
+      var total = subtotal - potonganRaw - kodeUnikRaw;
+      if (total < 0) total = 0;
+
+      var body = {
+        invoice: document.getElementById('editInvoice').value.trim(),
+        created_at: document.getElementById('editTanggal').value || new Date().toISOString().slice(0, 10),
+        status: document.getElementById('editStatus').value,
+        account_id: parseInt(document.getElementById('editPelanggan').value) || null,
+        products_id: parseInt(document.getElementById('editProduk').value) || null,
+        harga: hargaRaw,
+        qty: qty,
+        subtotal: subtotal,
+        kupon_id: parseInt(document.getElementById('editKupon').value) || null,
+        diskon_jumlah: potonganRaw,
+        total: total,
+        bank_id: parseInt(document.getElementById('editBank').value) || null
+      };
+
+      if (!body.account_id || !body.products_id) {
+        em.style.display = 'block'; em.style.background = '#4a0e0e'; em.textContent = 'Pelanggan dan Produk wajib diisi.'; em.style.color = '#fff';
+        return;
+      }
+      if (!body.invoice) {
+        em.style.display = 'block'; em.style.background = '#4a0e0e'; em.textContent = 'Invoice wajib diisi.'; em.style.color = '#fff';
+        return;
+      }
+
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+
       try {
-        const response = await fetch('/orders/' + orderId + '/update-status', {
+        const response = await fetch('/orders/' + orderId + '/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify(body),
           credentials: 'include'
         });
         const data = await response.json();
-        var em = document.getElementById('editOrderMessage');
         if (data.status === 'success') {
-          em.style.display = 'block'; em.style.background = '#1a4a1a'; em.textContent = 'Status berhasil diubah!'; em.style.color = '#fff';
+          em.style.display = 'block'; em.style.background = '#1a4a1a'; em.textContent = 'Order berhasil diperbarui!'; em.style.color = '#fff';
           setTimeout(function() { location.reload(); }, 1000);
         } else {
-          em.style.display = 'block'; em.style.background = '#4a0e0e'; em.textContent = data.message || 'Gagal mengubah status.'; em.style.color = '#fff';
-          btn.disabled = false;
-          btn.textContent = 'Simpan';
+          em.style.display = 'block'; em.style.background = '#4a0e0e'; em.textContent = data.message || 'Gagal memperbarui order.'; em.style.color = '#fff';
+          btn.disabled = false; btn.textContent = 'Simpan';
         }
       } catch (err) {
-        var em = document.getElementById('editOrderMessage');
         em.style.display = 'block'; em.style.background = '#4a0e0e'; em.textContent = 'Terjadi kesalahan.'; em.style.color = '#fff';
-        btn.disabled = false;
-        btn.textContent = 'Simpan';
+        btn.disabled = false; btn.textContent = 'Simpan';
       }
     });
 
