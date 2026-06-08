@@ -83,27 +83,6 @@ const user = {
         message: error.response?.data?.message || 'Gagal memperbarui user'
       });
     }
-  },
-
-  delete: async (req, res) => {
-    if (!req.session.admin) {
-      return res.status(401).json({ status: 'failed', message: 'Unauthorized' });
-    }
-
-    try {
-      const apiResponse = await axios.delete(`${API_BASE_URL}/admin/users/${req.params.id}`, {
-        data: { admin_id: req.session.admin.id },
-        withCredentials: true
-      });
-
-      return res.json(apiResponse.data);
-    } catch (error) {
-      console.error('Delete user error:', error);
-      return res.status(error.response?.status || 500).json({
-        status: 'failed',
-        message: error.response?.data?.message || 'Gagal menonaktifkan user'
-      });
-    }
   }
 };
 

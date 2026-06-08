@@ -316,11 +316,6 @@
                         data-user-role="<%= u.role %>">
                         <i class="fas fa-edit"></i>
                       </button>
-                      <button class="btn btn-sm btn-danger btn-delete-user"
-                        data-user-id="<%= u.id %>"
-                        data-user-nama="<%= encodeURIComponent(u.nama) %>">
-                        <i class="fas fa-ban"></i>
-                      </button>
                     </td>
                   </tr>
                 <% }); %>
@@ -522,22 +517,6 @@
     </div>
   </div>
 
-  <!-- Delete Confirm Modal -->
-  <div class="modal-overlay" id="deleteUserModal">
-    <div class="modal">
-      <h3><i class="fas fa-exclamation-triangle" style="color:#e63946"></i> Konfirmasi</h3>
-      <p style="color:#e0e0e0;margin-bottom:20px;" id="deleteUserText"></p>
-      <form id="deleteUserForm">
-        <input type="hidden" id="deleteUserId">
-        <div id="deleteUserMessage" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;"></div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-cancel btn-cancel-modal">Batal</button>
-          <button type="submit" class="btn btn-danger" id="deleteUserBtn">Nonaktifkan</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <script>
     // === Change Password ===
     document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
@@ -687,47 +666,6 @@
       } catch (error) {
         msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
         btn.disabled = false; btn.textContent = 'Simpan';
-      }
-    });
-
-    // === Delete User ===
-    document.addEventListener('click', function(e) {
-      var btn = e.target.closest('.btn-delete-user');
-      if (btn) {
-        document.getElementById('deleteUserId').value = btn.getAttribute('data-user-id');
-        var nama = decodeURIComponent(btn.getAttribute('data-user-nama'));
-        document.getElementById('deleteUserText').textContent = 'Nonaktifkan user "' + nama + '"?';
-        document.getElementById('deleteUserMessage').style.display = 'none';
-        showModal('deleteUserModal');
-      }
-    });
-
-    document.getElementById('deleteUserForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const id = document.getElementById('deleteUserId').value;
-      const msg = document.getElementById('deleteUserMessage');
-      const btn = document.getElementById('deleteUserBtn');
-
-      msg.style.display = 'none';
-      btn.disabled = true; btn.textContent = 'Memproses...';
-
-      try {
-        const response = await fetch('/users/' + id + '/delete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include'
-        });
-        const data = await response.json();
-        if (data.status === 'success') {
-          msg.style.display = 'block'; msg.style.background = '#1b4332'; msg.textContent = 'User berhasil dinonaktifkan!';
-          setTimeout(function() { location.reload(); }, 1500);
-        } else {
-          msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = data.message || 'Gagal menonaktifkan user';
-          btn.disabled = false; btn.textContent = 'Nonaktifkan';
-        }
-      } catch (error) {
-        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
-        btn.disabled = false; btn.textContent = 'Nonaktifkan';
       }
     });
 

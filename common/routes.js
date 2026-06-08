@@ -34,9 +34,6 @@ router.get("/users/:id/edit", async (req, res) => {
 router.post("/users/:id/update", async (req, res) => {
   user.update(req, res);
 });
-router.post("/users/:id/delete", async (req, res) => {
-  user.delete(req, res);
-});
 
 // Order management
 router.post("/orders/:id/update-status", async (req, res) => {
