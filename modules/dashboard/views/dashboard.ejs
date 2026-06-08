@@ -483,6 +483,12 @@
         <div class="form-group"><label>No. WhatsApp</label><input type="text" id="createNoWa" placeholder="081234567890" required></div>
         <div class="form-group"><label>Password</label><input type="password" id="createPassword" placeholder="Masukkan password" minlength="4" required></div>
         <div class="form-group"><label>Konfirmasi Password</label><input type="password" id="createConfirmPassword" placeholder="Ketik ulang password" required></div>
+        <div class="form-group"><label>Role</label>
+          <select id="createRole">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
         <div id="createUserMessage" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;"></div>
         <div class="modal-actions">
           <button type="button" class="btn btn-cancel btn-cancel-modal">Batal</button>
@@ -571,7 +577,7 @@
                 <td style="padding:6px 12px;"><input type="date" id="editTanggal" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;"></td></tr>
             <tr><td style="padding:6px 12px;color:#8899aa;">Status</td>
                 <td style="padding:6px 12px;">
-                  <select id="editStatus" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
+                  <select id="editOrderStatus" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
                     <option value="pending">Pending</option>
                     <option value="paid">Lunas</option>
                     <option value="cancel">Cancel</option>
@@ -582,8 +588,8 @@
                   <select id="editPelanggan" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
                     <option value="">— Pilih Pelanggan —</option>
                   </select></td></tr>
-            <tr><td style="padding:6px 12px;color:#8899aa;">Email</td><td style="padding:6px 12px;"><input type="text" id="editEmail" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
-            <tr><td style="padding:6px 12px;color:#8899aa;">No. WA</td><td style="padding:6px 12px;"><input type="text" id="editWa" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Email</td><td style="padding:6px 12px;"><input type="text" id="editOrderEmail" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">No. WA</td><td style="padding:6px 12px;"><input type="text" id="editOrderWa" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
             <tr><td colspan="2" style="padding:8px;border-bottom:1px solid #2a2a4a;"></td></tr>
             <tr><td style="padding:6px 12px;color:#8899aa;">Produk</td>
                 <td style="padding:6px 12px;">
@@ -711,6 +717,7 @@
       document.getElementById('createNoWa').value = '';
       document.getElementById('createPassword').value = '';
       document.getElementById('createConfirmPassword').value = '';
+      document.getElementById('createRole').value = 'user';
       document.getElementById('createUserMessage').style.display = 'none';
       showModal('createUserModal');
     });
@@ -745,7 +752,7 @@
         const response = await fetch('/users/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nama, email, no_wa, password }),
+          body: JSON.stringify({ nama, email, no_wa, password, role: document.getElementById('createRole').value }),
           credentials: 'include'
         });
         const data = await response.json();
@@ -976,7 +983,7 @@
         var dt = new Date(order.created_at);
         document.getElementById('editTanggal').value = dt.toISOString().slice(0, 10);
       }
-      document.getElementById('editStatus').value = order.status || 'pending';
+      document.getElementById('editOrderStatus').value = order.status || 'pending';
 
       var pelSelect = document.getElementById('editPelanggan');
       pelSelect.innerHTML = '<option value="">— Pilih Pelanggan —</option>';
@@ -1082,8 +1089,8 @@
           if (String(u.id) === String(val)) user = u;
         });
       }
-      document.getElementById('editEmail').value = user ? user.email : '';
-      document.getElementById('editWa').value = user ? user.no_wa : '';
+      document.getElementById('editOrderEmail').value = user ? user.email : '';
+      document.getElementById('editOrderWa').value = user ? user.no_wa : '';
     });
 
     // Produk change → auto-fill Harga & Kode Unik → recalc
@@ -1132,7 +1139,7 @@
       var body = {
         invoice: document.getElementById('editInvoice').value.trim(),
         created_at: document.getElementById('editTanggal').value || new Date().toISOString().slice(0, 10),
-        status: document.getElementById('editStatus').value,
+        status: document.getElementById('editOrderStatus').value,
         account_id: parseInt(document.getElementById('editPelanggan').value) || null,
         products_id: parseInt(document.getElementById('editProduk').value) || null,
         harga: hargaRaw,

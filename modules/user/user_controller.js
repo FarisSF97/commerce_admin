@@ -8,7 +8,7 @@ const user = {
       return res.status(401).json({ status: 'failed', message: 'Unauthorized' });
     }
 
-    const { nama, email, no_wa, password } = req.body;
+    const { nama, email, no_wa, password, role } = req.body;
     if (!nama || !email) {
       return res.status(400).json({ status: 'failed', message: 'Nama dan email diperlukan' });
     }
@@ -22,7 +22,8 @@ const user = {
         nama: nama.trim(),
         email: email.trim().toLowerCase(),
         no_wa: (no_wa || '').trim(),
-        password: password
+        password: password,
+        role: role || 'user'
       }, { withCredentials: true });
 
       return res.json(apiResponse.data);
