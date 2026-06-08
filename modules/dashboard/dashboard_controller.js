@@ -19,6 +19,9 @@ const dashboard = {
 
     // User management params
     const filter_status = ['aktif', 'suspend', 'cancel'].includes(req.query.filter_status) ? req.query.filter_status : '';
+    const allowedUserSortBy = ['nama', 'email', 'no_wa', 'status', 'role', 'created_at'];
+    const user_sort_by = allowedUserSortBy.includes(req.query.user_sort_by) ? req.query.user_sort_by : 'created_at';
+    const user_sort_dir = req.query.user_sort_dir === 'ASC' ? 'ASC' : 'DESC';
 
     // Order management params
     const allowedSortBy = ['invoice', 'tanggal', 'produk', 'qty', 'total', 'status'];
@@ -31,7 +34,7 @@ const dashboard = {
     try {
       // Always fetch users for the users tab
       const usersRes = await axios.get(`${API_BASE_URL}/admin/users`, {
-        params: { admin_id: adminId, page, limit, search, filter_status },
+        params: { admin_id: adminId, page, limit, search, filter_status, sort_by: user_sort_by, sort_dir: user_sort_dir },
         withCredentials: true
       });
 
@@ -63,6 +66,8 @@ const dashboard = {
         // Shared query params
         search: search,
         filter_status: filter_status,
+        user_sort_by: user_sort_by,
+        user_sort_dir: user_sort_dir,
 
         // Order-specific params
         sort_by: sort_by,
@@ -84,6 +89,8 @@ const dashboard = {
         ordersTotal: 0,
         search: search,
         filter_status: filter_status,
+        user_sort_by: user_sort_by,
+        user_sort_dir: user_sort_dir,
         sort_by: sort_by,
         sort_dir: sort_dir,
         filter_order_status: filter_order_status

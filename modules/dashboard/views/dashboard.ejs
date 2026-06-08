@@ -281,9 +281,11 @@
             <div class="filter-pills">
               <% var statuses = [{v:'',l:'All'},{v:'aktif',l:'Aktif'},{v:'suspend',l:'Suspend'},{v:'cancel',l:'Cancel'}]; %>
               <% statuses.forEach(function(s){ %>
-                <a href="?tab=users&search=<%= encodeURIComponent(search) %>&filter_status=<%= s.v %>&page=1" class="filter-pill <%= (filter_status || '') === s.v ? 'active' : '' %>"><%= s.l %></a>
+                <a href="?tab=users&search=<%= encodeURIComponent(search) %>&filter_status=<%= s.v %>&user_sort_by=<%= user_sort_by %>&user_sort_dir=<%= user_sort_dir %>&page=1" class="filter-pill <%= (filter_status || '') === s.v ? 'active' : '' %>"><%= s.l %></a>
               <% }); %>
             </div>
+            <input type="hidden" name="user_sort_by" value="<%= user_sort_by %>">
+            <input type="hidden" name="user_sort_dir" value="<%= user_sort_dir %>">
             <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
             <% if (search) { %>
               <a href="?tab=users" class="btn btn-cancel"><i class="fas fa-times"></i></a>
@@ -296,7 +298,28 @@
         <% } else { %>
           <div style="overflow-x:auto;">
             <table>
-              <thead><tr><th>#</th><th>Nama</th><th>Email</th><th>No. WA</th><th>Status</th><th>Role</th><th>Tanggal Daftar</th><th>Aksi</th></tr></thead>
+              <thead>
+                <tr>
+                  <%
+                    function sortUrlUsers(col) {
+                      var dir = user_sort_by === col ? (user_sort_dir === 'ASC' ? 'DESC' : 'ASC') : 'ASC';
+                      return '?tab=users&search=' + encodeURIComponent(search) + '&user_sort_by=' + col + '&user_sort_dir=' + dir + '&filter_status=' + (filter_status || '') + '&page=1';
+                    }
+                    function sortArrowUsers(col) {
+                      if (user_sort_by !== col) return '';
+                      return '<span class="sort-arrow">' + (user_sort_dir === 'ASC' ? '&#9650;' : '&#9660;') + '</span>';
+                    }
+                  %>
+                  <th>#</th>
+                  <th><a href="<%= sortUrlUsers('nama') %>" class="sort-link">Nama<%- sortArrowUsers('nama') %></a></th>
+                  <th><a href="<%= sortUrlUsers('email') %>" class="sort-link">Email<%- sortArrowUsers('email') %></a></th>
+                  <th><a href="<%= sortUrlUsers('no_wa') %>" class="sort-link">No. WA<%- sortArrowUsers('no_wa') %></a></th>
+                  <th><a href="<%= sortUrlUsers('status') %>" class="sort-link">Status<%- sortArrowUsers('status') %></a></th>
+                  <th><a href="<%= sortUrlUsers('role') %>" class="sort-link">Role<%- sortArrowUsers('role') %></a></th>
+                  <th><a href="<%= sortUrlUsers('created_at') %>" class="sort-link">Tanggal Daftar<%- sortArrowUsers('created_at') %></a></th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
               <tbody>
                 <% users.forEach(function(u, index){ %>
                   <tr>
@@ -332,7 +355,7 @@
           <% if (usersTotalPages > 1) { %>
             <div class="pagination">
               <% if (usersPage > 1) { %>
-                <a href="?tab=users&page=<%= usersPage - 1 %>&search=<%= encodeURIComponent(search) %>&filter_status=<%= filter_status %>">&laquo;</a>
+                <a href="?tab=users&page=<%= usersPage - 1 %>&search=<%= encodeURIComponent(search) %>&filter_status=<%= filter_status %>&user_sort_by=<%= user_sort_by %>&user_sort_dir=<%= user_sort_dir %>">&laquo;</a>
               <% } else { %>
                 <span class="disabled">&laquo;</span>
               <% } %>
@@ -340,13 +363,13 @@
                 <% if (i === usersPage) { %>
                   <span class="active"><%= i %></span>
                 <% } else if (i <= 3 || i > usersTotalPages - 3 || Math.abs(i - usersPage) <= 2) { %>
-                  <a href="?tab=users&page=<%= i %>&search=<%= encodeURIComponent(search) %>&filter_status=<%= filter_status %>"><%= i %></a>
+                  <a href="?tab=users&page=<%= i %>&search=<%= encodeURIComponent(search) %>&filter_status=<%= filter_status %>&user_sort_by=<%= user_sort_by %>&user_sort_dir=<%= user_sort_dir %>"><%= i %></a>
                 <% } else if (i === 4 && usersPage > 4) { %>
                   <span class="dots">...</span>
                 <% } %>
               <% } %>
               <% if (usersPage < usersTotalPages) { %>
-                <a href="?tab=users&page=<%= usersPage + 1 %>&search=<%= encodeURIComponent(search) %>&filter_status=<%= filter_status %>">&raquo;</a>
+                <a href="?tab=users&page=<%= usersPage + 1 %>&search=<%= encodeURIComponent(search) %>&filter_status=<%= filter_status %>&user_sort_by=<%= user_sort_by %>&user_sort_dir=<%= user_sort_dir %>">&raquo;</a>
               <% } else { %>
                 <span class="disabled">&raquo;</span>
               <% } %>
