@@ -8,9 +8,12 @@ const user = {
       return res.status(401).json({ status: 'failed', message: 'Unauthorized' });
     }
 
-    const { nama, email, no_wa } = req.body;
+    const { nama, email, no_wa, password } = req.body;
     if (!nama || !email) {
       return res.status(400).json({ status: 'failed', message: 'Nama dan email diperlukan' });
+    }
+    if (!password || password.length < 4) {
+      return res.status(400).json({ status: 'failed', message: 'Password minimal 4 karakter' });
     }
 
     try {
@@ -18,7 +21,8 @@ const user = {
         admin_id: req.session.admin.id,
         nama: nama.trim(),
         email: email.trim().toLowerCase(),
-        no_wa: (no_wa || '').trim()
+        no_wa: (no_wa || '').trim(),
+        password: password
       }, { withCredentials: true });
 
       return res.json(apiResponse.data);
