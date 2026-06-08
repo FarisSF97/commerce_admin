@@ -417,9 +417,13 @@
                     <td><span class="badge badge-<%= o.status %>"><%= o.status === 'pending' ? 'Pending' : o.status === 'paid' ? 'Lunas' : 'Cancel' %></span></td>
                     <td><%= new Date(o.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></td>
                     <td style="white-space:nowrap;">
-                      <button type="button" class="btn btn-sm btn-info btn-view-order"
-                        data-order='<%= encodeURIComponent(JSON.stringify(o)) %>'>
+                        <button type="button" class="btn btn-sm btn-info btn-view-order"
+                          data-order='<%= encodeURIComponent(JSON.stringify(o)) %>'>
                           Detail
+                        </button>
+                        <button type="button" class="btn btn-sm btn-warning btn-edit-order"
+                          data-order='<%= encodeURIComponent(JSON.stringify(o)) %>'>
+                          <i class="fas fa-edit"></i>
                         </button>
                       <% if (o.status === 'pending') { %>
                         <button type="button" class="btn btn-sm btn-success btn-confirm-payment"
@@ -539,7 +543,7 @@
           <tr><td style="padding:8px 12px;color:#8899aa;">Kode Unik</td><td style="padding:8px 12px;color:#ff9800;" id="od-kodeunik"></td></tr>
           <tr><td style="padding:8px 12px;color:#8899aa;font-weight:700;">Total</td><td style="padding:8px 12px;color:#fff;font-weight:700;font-size:16px;" id="od-total"></td></tr>
           <tr><td colspan="2" style="padding:12px;border-bottom:1px solid #2a2a4a;"></td></tr>
-          <tr><td style="padding:8px 12px;color:#8899aa;">Bank</td><td style="padding:8px 12px;color:#fff;" id="od-bank"></td></tr>
+          <tr><td style="padding:8px 12px;color:#8899aa;">Pembayaran</td><td style="padding:8px 12px;color:#fff;" id="od-bank"></td></tr>
           <tr><td style="padding:8px 12px;color:#8899aa;">No. Rekening</td><td style="padding:8px 12px;color:#fff;" id="od-rekening"></td></tr>
           <tr><td style="padding:8px 12px;color:#8899aa;">Atas Nama</td><td style="padding:8px 12px;color:#fff;" id="od-rekowner"></td></tr>
         </table>
@@ -547,6 +551,31 @@
       <div class="modal-actions">
         <button type="button" class="btn btn-cancel btn-cancel-modal">Tutup</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Edit Order Modal -->
+  <div class="modal-overlay" id="editOrderModal">
+    <div class="modal">
+      <h3><i class="fas fa-edit"></i> Edit Order</h3>
+      <form id="editOrderForm">
+        <input type="hidden" id="editOrderId">
+        <div class="form-group"><label>Invoice</label><input type="text" id="editOrderInvoice" readonly style="background:#2a2a4a;color:#8899aa;cursor:not-allowed;"></div>
+        <div class="form-group"><label>Pelanggan</label><input type="text" id="editOrderCustomer" readonly style="background:#2a2a4a;color:#8899aa;cursor:not-allowed;"></div>
+        <div class="form-group"><label>Status Saat Ini</label><input type="text" id="editOrderCurrentStatus" readonly style="background:#2a2a4a;color:#8899aa;cursor:not-allowed;"></div>
+        <div class="form-group"><label>Ubah Status</label>
+          <select id="editOrderStatus" required>
+            <option value="pending">Pending</option>
+            <option value="paid">Lunas</option>
+            <option value="cancel">Cancel</option>
+          </select>
+        </div>
+        <div id="editOrderMessage" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-cancel btn-cancel-modal">Batal</button>
+          <button type="submit" class="btn btn-primary" id="editOrderBtn">Simpan</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -856,6 +885,54 @@
         if (confirm('Cancel order ' + invoice + '?')) {
           updateOrderStatus(orderId, 'cancel');
         }
+      }
+    });
+
+    // === Edit Order ===
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.btn-edit-order');
+      if (btn) {
+        var o = JSON.parse(decodeURIComponent(btn.getAttribute('data-order')));
+        document.getElementById('editOrderId').value = o.id;
+        document.getElementById('editOrderInvoice').value = o.invoice || '-';
+        document.getElementById('editOrderCustomer').value = o.account_name || '-';
+        var statusLabel = o.status === 'pending' ? 'Pending' : o.status === 'paid' ? 'Lunas' : 'Cancel';
+        document.getElementById('editOrderCurrentStatus').value = statusLabel;
+        document.getElementById('editOrderStatus').value = o.status;
+        document.getElementById('editOrderMessage').style.display = 'none';
+        showModal('editOrderModal');
+      }
+    });
+
+    document.getElementById('editOrderForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var orderId = document.getElementById('editOrderId').value;
+      var newStatus = document.getElementById('editOrderStatus').value;
+      var btn = document.getElementById('editOrderBtn');
+      btn.disabled = true;
+      btn.textContent = 'Menyimpan...';
+      try {
+        const response = await fetch('/orders/' + orderId + '/update-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus }),
+          credentials: 'include'
+        });
+        const data = await response.json();
+        var em = document.getElementById('editOrderMessage');
+        if (data.status === 'success') {
+          em.style.display = 'block'; em.style.background = '#1a4a1a'; em.textContent = 'Status berhasil diubah!'; em.style.color = '#fff';
+          setTimeout(function() { location.reload(); }, 1000);
+        } else {
+          em.style.display = 'block'; em.style.background = '#4a0e0e'; em.textContent = data.message || 'Gagal mengubah status.'; em.style.color = '#fff';
+          btn.disabled = false;
+          btn.textContent = 'Simpan';
+        }
+      } catch (err) {
+        var em = document.getElementById('editOrderMessage');
+        em.style.display = 'block'; em.style.background = '#4a0e0e'; em.textContent = 'Terjadi kesalahan.'; em.style.color = '#fff';
+        btn.disabled = false;
+        btn.textContent = 'Simpan';
       }
     });
 
