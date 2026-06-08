@@ -539,7 +539,8 @@
           <tr><td style="padding:8px 12px;color:#8899aa;">Jumlah</td><td style="padding:8px 12px;color:#fff;" id="od-qty"></td></tr>
           <tr><td style="padding:8px 12px;color:#8899aa;">Subtotal</td><td style="padding:8px 12px;color:#fff;" id="od-subtotal"></td></tr>
           <tr><td colspan="2" style="padding:12px;border-bottom:1px solid #2a2a4a;"></td></tr>
-          <tr><td style="padding:8px 12px;color:#8899aa;">Diskon</td><td style="padding:8px 12px;color:#4caf50;" id="od-diskon"></td></tr>
+          <tr><td style="padding:8px 12px;color:#8899aa;">Kode Voucher</td><td style="padding:8px 12px;color:#fff;" id="od-kodevoucher"></td></tr>
+          <tr><td style="padding:8px 12px;color:#8899aa;">Potongan</td><td style="padding:8px 12px;color:#4caf50;" id="od-potongan"></td></tr>
           <tr><td style="padding:8px 12px;color:#8899aa;">Kode Unik</td><td style="padding:8px 12px;color:#ff9800;" id="od-kodeunik"></td></tr>
           <tr><td style="padding:8px 12px;color:#8899aa;font-weight:700;">Total</td><td style="padding:8px 12px;color:#fff;font-weight:700;font-size:16px;" id="od-total"></td></tr>
           <tr><td colspan="2" style="padding:12px;border-bottom:1px solid #2a2a4a;"></td></tr>
@@ -855,7 +856,8 @@
         document.getElementById('od-harga').textContent = o.harga ? 'Rp ' + Number(o.harga).toLocaleString('id-ID') : '-';
         document.getElementById('od-qty').textContent = o.qty || '-';
         document.getElementById('od-subtotal').textContent = o.subtotal ? 'Rp ' + Number(o.subtotal).toLocaleString('id-ID') : '-';
-        document.getElementById('od-diskon').textContent = o.diskon_jumlah ? '-Rp ' + Number(o.diskon_jumlah).toLocaleString('id-ID') : 'Rp 0';
+        document.getElementById('od-kodevoucher').textContent = o.kupon_kode || '-';
+        document.getElementById('od-potongan').textContent = o.diskon_jumlah ? '-Rp ' + Number(o.diskon_jumlah).toLocaleString('id-ID') : 'Rp 0';
         document.getElementById('od-kodeunik').textContent = o.kode_unik ? '-Rp ' + Number(o.kode_unik).toLocaleString('id-ID') : 'Rp 0';
         document.getElementById('od-total').textContent = o.total ? 'Rp ' + Number(o.total).toLocaleString('id-ID') : '-';
         document.getElementById('od-bank').textContent = o.bank_name || '-';
