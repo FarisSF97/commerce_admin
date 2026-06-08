@@ -31,7 +31,7 @@ const dashboard = {
     try {
       // Always fetch users for the users tab
       const usersRes = await axios.get(`${API_BASE_URL}/admin/users`, {
-        params: { admin_id: adminId, page, limit, search, filter_status, role: 'user' },
+        params: { admin_id: adminId, page, limit, search, filter_status },
         withCredentials: true
       });
 
