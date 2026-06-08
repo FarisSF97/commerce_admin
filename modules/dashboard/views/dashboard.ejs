@@ -657,14 +657,14 @@
         });
         const data = await response.json();
         if (data.status === 'success') {
-          msg.style.display = 'block'; msg.style.background = '#1b4332'; msg.textContent = 'User berhasil diperbarui!';
+          msg.style.display = 'block'; msg.style.color = '#ffffff'; msg.style.background = '#1b4332'; msg.textContent = 'User berhasil diperbarui!';
           setTimeout(function() { location.reload(); }, 1500);
         } else {
-          msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = data.message || 'Gagal memperbarui user';
+          msg.style.display = 'block'; msg.style.color = '#ffffff'; msg.style.background = '#4a0e0e'; msg.textContent = data.message || 'Gagal memperbarui user!';
           btn.disabled = false; btn.textContent = 'Simpan';
         }
       } catch (error) {
-        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+        msg.style.display = 'block'; msg.style.color = '#ffffff'; msg.style.background = '#4a0e0e'; msg.textContent = 'Terjadi kesalahan. Silakan coba lagi!';
         btn.disabled = false; btn.textContent = 'Simpan';
       }
     });
