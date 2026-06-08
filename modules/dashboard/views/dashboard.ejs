@@ -997,7 +997,7 @@
       var kupSelect = document.getElementById('editKupon');
       kupSelect.innerHTML = '<option value="">— Pilih Kupon —</option>';
       kupon.forEach(function(k) {
-        kupSelect.innerHTML += '<option value="' + k.id + '" data-potongan="' + (k.potongan || 0) + '">' + escHtml(k.kode) + '</option>';
+        kupSelect.innerHTML += '<option value="' + k.id + '" data-potongan="' + (k.potongan || 0) + '" data-tipe="' + (k.tipe || 'fixed') + '" data-min-order="' + (k.min_order || 0) + '" data-valid-from="' + (k.valid_from || '') + '" data-valid-until="' + (k.valid_until || '') + '">' + escHtml(k.kode) + '</option>';
       });
       kupSelect.value = order.kupon_id || '';
 
@@ -1026,12 +1026,47 @@
       el.dispatchEvent(evt);
     }
 
+    function editOrderCalcKupon(subtotal) {
+      var sel = document.getElementById('editKupon').options[document.getElementById('editKupon').selectedIndex];
+      var el = document.getElementById('editPotongan');
+      if (!sel || !sel.value) {
+        el.value = 'Rp 0'; el.style.color = '#8899aa';
+        return 0;
+      }
+      var nominal = parseInt(sel.getAttribute('data-potongan')) || 0;
+      var tipe = sel.getAttribute('data-tipe') || 'fixed';
+      var minOrder = parseInt(sel.getAttribute('data-min-order')) || 0;
+      var validFrom = sel.getAttribute('data-valid-from');
+      var validUntil = sel.getAttribute('data-valid-until');
+      var now = new Date();
+
+      if (validFrom && new Date(validFrom) > now) {
+        el.value = 'Kupon belum berlaku'; el.style.color = '#f44336';
+        return 0;
+      }
+      if (validUntil && new Date(validUntil) < now) {
+        el.value = 'Kupon kedaluwarsa'; el.style.color = '#f44336';
+        return 0;
+      }
+      if (subtotal < minOrder) {
+        el.value = 'Min. Rp ' + minOrder.toLocaleString('id-ID'); el.style.color = '#ff9800';
+        return 0;
+      }
+
+      var potongan = tipe === 'percentage' ? Math.round(subtotal * nominal / 100) : nominal;
+      el.value = tipe === 'percentage'
+        ? '-Rp ' + potongan.toLocaleString('id-ID') + ' (' + nominal + '%)'
+        : '-Rp ' + potongan.toLocaleString('id-ID');
+      el.style.color = '#4caf50';
+      return potongan;
+    }
+
     function editOrderCalc() {
       var harga = parseInt(document.getElementById('editHarga').value.replace(/[^0-9]/g, '')) || 0;
       var qty = parseInt(document.getElementById('editJumlah').value) || 0;
-      var potongan = parseInt(document.getElementById('editPotongan').value.replace(/[^0-9]/g, '')) || 0;
       var kodeUnik = parseInt(document.getElementById('editKodeUnik').value.replace(/[^0-9]/g, '')) || 0;
       var subtotal = harga * qty;
+      var potongan = editOrderCalcKupon(subtotal);
       var total = subtotal - potongan - kodeUnik;
       if (total < 0) total = 0;
       document.getElementById('editSubtotal').value = 'Rp ' + subtotal.toLocaleString('id-ID');
@@ -1066,11 +1101,8 @@
       editOrderCalc();
     });
 
-    // Kupon change → auto-fill Potongan → recalc
+    // Kupon change → auto-fill Potongan with validation → recalc
     document.getElementById('editKupon').addEventListener('change', function() {
-      var sel = this.options[this.selectedIndex];
-      var potongan = sel ? parseInt(sel.getAttribute('data-potongan')) || 0 : 0;
-      document.getElementById('editPotongan').value = 'Rp ' + potongan.toLocaleString('id-ID');
       editOrderCalc();
     });
 
