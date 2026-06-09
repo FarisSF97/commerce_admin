@@ -49,7 +49,7 @@ const order = {
     }
 
     const { status } = req.body;
-    if (!['pending', 'paid', 'cancel'].includes(status)) {
+    if (!['pending', 'paid', 'cancel', 'delete'].includes(status)) {
       return res.status(400).json({ status: 'failed', message: 'Status tidak valid' });
     }
 

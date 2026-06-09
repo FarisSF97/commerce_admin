@@ -389,7 +389,7 @@
           <div class="filter-bar">
             <input type="text" name="search" placeholder="Cari invoice, produk, atau nama..." value="<%= search %>">
             <div class="filter-pills">
-              <% var orderStatuses = [{v:'',l:'All'},{v:'pending',l:'Pending'},{v:'paid',l:'Lunas'},{v:'cancel',l:'Cancel'}]; %>
+              <% var orderStatuses = [{v:'',l:'All'},{v:'pending',l:'Pending'},{v:'paid',l:'Lunas'},{v:'cancel',l:'Cancel'},{v:'delete',l:'Delete'}]; %>
               <% orderStatuses.forEach(function(s){ %>
                 <a href="?tab=orders&search=<%= encodeURIComponent(search) %>&filter_order_status=<%= s.v %>&sort_by=<%= sort_by %>&sort_dir=<%= sort_dir %>&page=1" class="filter-pill <%= (filter_order_status || '') === s.v ? 'active' : '' %>"><%= s.l %></a>
               <% }); %>
@@ -440,7 +440,7 @@
                     <td><%= o.product_name %></td>
                     <td><%= o.qty %></td>
                     <td>Rp <%= Number(o.total).toLocaleString('id-ID') %></td>
-                    <td><span class="badge badge-<%= o.status %>"><%= o.status === 'pending' ? 'Pending' : o.status === 'paid' ? 'Lunas' : 'Cancel' %></span></td>
+                    <td><span class="badge badge-<%= o.status %>"><%= o.status === 'pending' ? 'Pending' : o.status === 'paid' ? 'Lunas' : o.status === 'delete' ? 'Delete' : 'Cancel' %></span></td>
                     <td><%= new Date(o.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></td>
                     <td style="white-space:nowrap;">
                         <button type="button" class="btn btn-sm btn-info btn-view-order"
@@ -461,6 +461,14 @@
                           data-order-id="<%= o.id %>"
                           data-order-invoice="<%= encodeURIComponent(o.invoice) %>">
                           <i class="fas fa-times"></i>
+                        </button>
+                      <% } %>
+                      <% if (o.status !== 'delete') { %>
+                        <button type="button" class="btn btn-sm btn-danger btn-delete-order"
+                          style="margin-left:4px;"
+                          data-order-id="<%= o.id %>"
+                          data-order-invoice="<%= encodeURIComponent(o.invoice) %>">
+                          <i class="fas fa-trash"></i>
                         </button>
                       <% } %>
                     </td>
@@ -920,8 +928,8 @@
         var o = JSON.parse(decodeURIComponent(btn.getAttribute('data-order')));
         document.getElementById('od-invoice').textContent = o.invoice || '-';
         document.getElementById('od-tanggal').textContent = o.created_at ? new Date(o.created_at).toLocaleDateString('id-ID', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
-        var statusLabel = o.status === 'pending' ? 'Pending' : o.status === 'paid' ? 'Lunas' : 'Cancel';
-        var statusColor = o.status === 'pending' ? '#ff9800' : o.status === 'paid' ? '#4caf50' : '#f44336';
+        var statusLabel = o.status === 'pending' ? 'Pending' : o.status === 'paid' ? 'Lunas' : o.status === 'delete' ? 'Delete' : 'Cancel';
+        var statusColor = o.status === 'pending' ? '#ff9800' : o.status === 'paid' ? '#4caf50' : o.status === 'delete' ? '#888' : '#f44336';
         document.getElementById('od-status').innerHTML = '<span style="color:' + statusColor + ';font-weight:600;">' + statusLabel + '</span>';
         document.getElementById('od-pelanggan').textContent = o.account_name || '-';
         document.getElementById('od-email').textContent = o.account_email || '-';
@@ -960,6 +968,17 @@
         var invoice = decodeURIComponent(btn.getAttribute('data-order-invoice'));
         if (confirm('Cancel order ' + invoice + '?')) {
           updateOrderStatus(orderId, 'cancel');
+        }
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.btn-delete-order');
+      if (btn) {
+        var orderId = btn.getAttribute('data-order-id');
+        var invoice = decodeURIComponent(btn.getAttribute('data-order-invoice'));
+        if (confirm('Hapus order ' + invoice + '?')) {
+          updateOrderStatus(orderId, 'delete');
         }
       }
     });

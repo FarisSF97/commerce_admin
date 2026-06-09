@@ -27,7 +27,7 @@ const dashboard = {
     const allowedSortBy = ['invoice', 'tanggal', 'pelanggan', 'produk', 'qty', 'total', 'status'];
     const sort_by = allowedSortBy.includes(req.query.sort_by) ? req.query.sort_by : 'tanggal';
     const sort_dir = req.query.sort_dir === 'ASC' ? 'ASC' : 'DESC';
-    const filter_order_status = ['pending', 'paid', 'cancel'].includes(req.query.filter_order_status) ? req.query.filter_order_status : '';
+    const filter_order_status = ['pending', 'paid', 'cancel', 'delete'].includes(req.query.filter_order_status) ? req.query.filter_order_status : '';
 
     const adminId = admin.id;
 
