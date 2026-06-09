@@ -420,6 +420,7 @@
                       return '<span class="sort-arrow">' + (sort_dir === 'ASC' ? '&#9650;' : '&#9660;') + '</span>';
                     }
                   %>
+                  <th>#</th>
                   <th><a href="<%= sortUrlOrders('invoice') %>" class="sort-link">Invoice<%- sortArrow('invoice') %></a></th>
                   <th>Pelanggan</th>
                   <th>Produk</th>
@@ -431,8 +432,9 @@
                 </tr>
               </thead>
               <tbody>
-                <% orders.forEach(function(o){ %>
+                <% orders.forEach(function(o, index){ %>
                   <tr>
+                    <td><%= (ordersPage - 1) * 10 + (index + 1) %></td>
                     <td><%= o.invoice %></td>
                     <td><%= o.account_name %><br><small style="color:#8899aa"><%= o.account_email %></small></td>
                     <td><%= o.product_name %></td>
