@@ -18,7 +18,7 @@ const dashboard = {
     const search = (req.query.search || '').trim();
 
     // User management params
-    const filter_status = ['aktif', 'suspend', 'cancel'].includes(req.query.filter_status) ? req.query.filter_status : '';
+    const filter_status = ['aktif', 'suspend', 'delete'].includes(req.query.filter_status) ? req.query.filter_status : '';
     const allowedUserSortBy = ['nama', 'email', 'no_wa', 'status', 'role', 'created_at'];
     const user_sort_by = allowedUserSortBy.includes(req.query.user_sort_by) ? req.query.user_sort_by : 'created_at';
     const user_sort_dir = req.query.user_sort_dir === 'ASC' ? 'ASC' : 'DESC';
