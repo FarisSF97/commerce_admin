@@ -100,6 +100,7 @@
     .badge-aktif, .badge-paid { background: #1b4332; color: #52b788; }
     .badge-suspend, .badge-pending { background: #4a3000; color: #ffd60a; }
     .badge-cancel { background: #4a0e0e; color: #e63946; }
+    .badge-delete { background: #4a0e0e; color: #e63946; }
     .badge-user { background: #1d3557; color: #a8dadc; }
     .badge-admin { background: #4a0e4a; color: #c77dff; }
 
@@ -279,7 +280,7 @@
           <div class="filter-bar">
             <input type="text" name="search" placeholder="Cari nama, email, atau no WA..." value="<%= search %>">
             <div class="filter-pills">
-              <% var statuses = [{v:'',l:'All'},{v:'aktif',l:'Aktif'},{v:'suspend',l:'Suspend'},{v:'cancel',l:'Cancel'}]; %>
+              <% var statuses = [{v:'',l:'All'},{v:'aktif',l:'Aktif'},{v:'suspend',l:'Suspend'},{v:'delete',l:'Delete'}]; %>
               <% statuses.forEach(function(s){ %>
                 <a href="?tab=users&search=<%= encodeURIComponent(search) %>&filter_status=<%= s.v %>&user_sort_by=<%= user_sort_by %>&user_sort_dir=<%= user_sort_dir %>&page=1" class="filter-pill <%= (filter_status || '') === s.v ? 'active' : '' %>"><%= s.l %></a>
               <% }); %>
@@ -674,7 +675,7 @@
           <select id="editStatus">
             <option value="aktif">Aktif</option>
             <option value="suspend">Suspend</option>
-            <option value="cancel">Cancel</option>
+            <option value="delete">Delete</option>
           </select>
         </div>
         <div class="form-group"><label>Role</label>
