@@ -49,6 +49,9 @@ router.post("/users/:id/update", async (req, res) => {
 router.post("/users/:id/reset-password", async (req, res) => {
   user.resetPassword(req, res);
 });
+router.post("/users/:id/upload-avatar", async (req, res) => {
+  user.uploadAvatar(req, res);
+});
 
 // Order management
 router.get("/orders/create-data", async (req, res) => {

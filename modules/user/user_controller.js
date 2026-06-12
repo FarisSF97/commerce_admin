@@ -109,6 +109,32 @@ const user = {
         message: error.response?.data?.message || 'Gagal memperbarui user'
       });
     }
+  },
+
+  uploadAvatar: async (req, res) => {
+    if (!req.session.admin) {
+      return res.status(401).json({ status: 'failed', message: 'Unauthorized' });
+    }
+
+    const { foto_base64 } = req.body;
+    if (!foto_base64) {
+      return res.status(400).json({ status: 'failed', message: 'Foto diperlukan' });
+    }
+
+    try {
+      const apiResponse = await axios.post(`${API_BASE_URL}/admin/users/${req.params.id}/avatar`, {
+        admin_id: req.session.admin.id,
+        foto_base64
+      }, { withCredentials: true });
+
+      return res.json(apiResponse.data);
+    } catch (error) {
+      console.error('Upload user avatar error:', error);
+      return res.status(error.response?.status || 500).json({
+        status: 'failed',
+        message: error.response?.data?.message || 'Gagal mengunggah foto user'
+      });
+    }
   }
 };
 
