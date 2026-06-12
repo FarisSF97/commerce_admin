@@ -383,9 +383,12 @@
     <!-- Tab: Manajemen Order -->
     <div class="tab-content <%= activeTab === 'orders' ? 'active' : '' %>">
       <div class="card">
-        <h3><i class="fas fa-shopping-cart"></i> Data Order</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <h3 style="margin:0;"><i class="fas fa-shopping-cart"></i> Data Order</h3>
+          <button type="button" class="btn btn-primary btn-add-order"><i class="fas fa-plus"></i> Tambah Order</button>
+        </div>
 
-        <form action="?tab=orders" method="GET" style="margin-bottom:16px;">
+        <form action="?tab=orders" method="GET" style="margin-top:16px;margin-bottom:16px;">
           <input type="hidden" name="tab" value="orders">
           <div class="filter-bar">
             <input type="text" name="search" placeholder="Cari invoice, produk, atau nama..." value="<%= search %>">
@@ -656,6 +659,66 @@
           <div class="modal-actions">
             <button type="button" class="btn btn-cancel btn-cancel-modal">Batal</button>
             <button type="submit" class="btn btn-primary" id="editOrderBtn">Simpan</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Create Order Modal -->
+  <div class="modal-overlay" id="createOrderModal">
+    <div class="modal" style="max-width:650px;">
+      <h3><i class="fas fa-plus-circle"></i> Buat Order Baru</h3>
+      <form id="createOrderForm">
+        <div id="createOrderLoading" style="text-align:center;padding:20px;color:#8899aa;">Memuat data...</div>
+        <div id="createOrderFormBody" style="display:none;">
+          <table class="detail-table" style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;">
+            <tr><td style="padding:6px 12px;color:#8899aa;width:140px;">Status</td>
+                <td style="padding:6px 12px;">
+                  <select id="createOrderStatus" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
+                    <option value="pending">Pending</option>
+                    <option value="paid">Lunas</option>
+                  </select></td></tr>
+            <tr><td colspan="2" style="padding:8px;border-bottom:1px solid #2a2a4a;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Pelanggan</td>
+                <td style="padding:6px 12px;">
+                  <select id="createPelanggan" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
+                    <option value="">— Pilih Pelanggan —</option>
+                  </select></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Email</td><td style="padding:6px 12px;"><input type="text" id="createOrderEmail" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">No. WA</td><td style="padding:6px 12px;"><input type="text" id="createOrderWa" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td colspan="2" style="padding:8px;border-bottom:1px solid #2a2a4a;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Produk</td>
+                <td style="padding:6px 12px;">
+                  <select id="createProduk" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
+                    <option value="">— Pilih Produk —</option>
+                  </select></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Harga</td><td style="padding:6px 12px;"><input type="text" id="createHarga" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Jumlah</td><td style="padding:6px 12px;"><input type="number" id="createJumlah" min="1" value="1" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Subtotal</td><td style="padding:6px 12px;"><input type="text" id="createSubtotal" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td colspan="2" style="padding:8px;border-bottom:1px solid #2a2a4a;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Kode Voucher</td>
+                <td style="padding:6px 12px;">
+                  <select id="createKupon" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
+                    <option value="">— Pilih Kupon —</option>
+                  </select></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Potongan</td><td style="padding:6px 12px;"><input type="text" id="createPotongan" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#4caf50;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Kode Unik</td><td style="padding:6px 12px;"><input type="text" id="createKodeUnik" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#ff9800;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td colspan="2" style="padding:8px;border-bottom:1px solid #2a2a4a;"></td></tr>
+            <tr><td style="padding:8px 12px;color:#8899aa;font-weight:700;">Total</td><td style="padding:8px 12px;color:#fff;font-weight:700;font-size:16px;" id="createTotalDisplay">Rp 0</td></tr>
+            <tr><td colspan="2" style="padding:8px;border-bottom:1px solid #2a2a4a;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Pembayaran</td>
+                <td style="padding:6px 12px;">
+                  <select id="createBank" style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#1a1a2e;color:#fff;font-size:13px;">
+                    <option value="">— Pilih Pembayaran —</option>
+                  </select></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">No. Rekening</td><td style="padding:6px 12px;"><input type="text" id="createRekening" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+            <tr><td style="padding:6px 12px;color:#8899aa;">Atas Nama</td><td style="padding:6px 12px;"><input type="text" id="createRekeningOwner" readonly style="width:100%;padding:6px 10px;border:1px solid #2a2a4a;border-radius:6px;background:#2a2a4a;color:#8899aa;font-size:13px;cursor:not-allowed;"></td></tr>
+          </table>
+          <div id="createOrderMessage" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;"></div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-cancel btn-cancel-modal">Batal</button>
+            <button type="submit" class="btn btn-primary" id="createOrderBtn">Buat Order</button>
           </div>
         </div>
       </form>
@@ -1225,6 +1288,224 @@
       } catch (err) {
         em.style.display = 'block'; em.style.background = '#4a0e0e'; em.textContent = 'Terjadi kesalahan.'; em.style.color = '#fff';
         btn.disabled = false; btn.textContent = 'Simpan';
+      }
+    });
+
+    // === Create Order ===
+    var createOrderData = null;
+
+    document.querySelector('.btn-add-order').addEventListener('click', function() {
+      document.getElementById('createOrderFormBody').style.display = 'none';
+      document.getElementById('createOrderLoading').style.display = 'block';
+      document.getElementById('createOrderMessage').style.display = 'none';
+      document.getElementById('createOrderBtn').disabled = false;
+      document.getElementById('createOrderBtn').textContent = 'Buat Order';
+      showModal('createOrderModal');
+
+      fetch('/orders/create-data', { credentials: 'include' })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          if (res.status !== 'success') {
+            document.getElementById('createOrderLoading').textContent = 'Gagal memuat data: ' + (res.message || 'unknown');
+            return;
+          }
+          var d = res.data;
+          createOrderData = d;
+          populateCreateForm(d);
+          document.getElementById('createOrderLoading').style.display = 'none';
+          document.getElementById('createOrderFormBody').style.display = 'block';
+        })
+        .catch(function(err) {
+          document.getElementById('createOrderLoading').textContent = 'Terjadi kesalahan saat memuat data.';
+        });
+    });
+
+    function populateCreateForm(d) {
+      var users = d.users || [];
+      var products = d.products || [];
+      var kupon = d.kupon || [];
+      var banks = d.banks || [];
+
+      document.getElementById('createOrderStatus').value = 'pending';
+
+      var pelSelect = document.getElementById('createPelanggan');
+      pelSelect.innerHTML = '<option value="">— Pilih Pelanggan —</option>';
+      users.forEach(function(u) {
+        pelSelect.innerHTML += '<option value="' + u.id + '">' + escHtml(u.nama) + ' (' + escHtml(u.email) + ')</option>';
+      });
+
+      var proSelect = document.getElementById('createProduk');
+      proSelect.innerHTML = '<option value="">— Pilih Produk —</option>';
+      products.forEach(function(p) {
+        proSelect.innerHTML += '<option value="' + p.id + '" data-harga="' + p.harga + '" data-kodeunik="' + (p.kode_unik || 0) + '">' + escHtml(p.nama) + '</option>';
+      });
+
+      document.getElementById('createJumlah').value = 1;
+
+      var kupSelect = document.getElementById('createKupon');
+      kupSelect.innerHTML = '<option value="">— Pilih Kupon —</option>';
+      kupon.forEach(function(k) {
+        kupSelect.innerHTML += '<option value="' + k.id + '" data-potongan="' + (k.potongan || 0) + '" data-tipe="' + (k.tipe || 'fixed') + '" data-min-order="' + (k.min_order || 0) + '" data-valid-from="' + (k.valid_from || '') + '" data-valid-until="' + (k.valid_until || '') + '">' + escHtml(k.kode) + '</option>';
+      });
+
+      var bankSelect = document.getElementById('createBank');
+      bankSelect.innerHTML = '<option value="">— Pilih Pembayaran —</option>';
+      banks.forEach(function(b) {
+        bankSelect.innerHTML += '<option value="' + b.id + '" data-rek="' + escHtml(b.no_rek || '') + '" data-owner="' + escHtml(b.atas_nama || '') + '">' + escHtml(b.jenis_bank) + '</option>';
+      });
+
+      // Reset readonly fields
+      document.getElementById('createHarga').value = '';
+      document.getElementById('createKodeUnik').value = '';
+      document.getElementById('createOrderEmail').value = '';
+      document.getElementById('createOrderWa').value = '';
+      document.getElementById('createSubtotal').value = 'Rp 0';
+      document.getElementById('createPotongan').value = 'Rp 0';
+      document.getElementById('createRekening').value = '';
+      document.getElementById('createRekeningOwner').value = '';
+      document.getElementById('createTotalDisplay').textContent = 'Rp 0';
+    }
+
+    function createCalcKupon(subtotal) {
+      var sel = document.getElementById('createKupon').options[document.getElementById('createKupon').selectedIndex];
+      var el = document.getElementById('createPotongan');
+      if (!sel || !sel.value) {
+        el.value = 'Rp 0'; el.style.color = '#8899aa';
+        return 0;
+      }
+      var nominal = parseInt(sel.getAttribute('data-potongan')) || 0;
+      var tipe = sel.getAttribute('data-tipe') || 'fixed';
+      var minOrder = parseInt(sel.getAttribute('data-min-order')) || 0;
+      var validFrom = sel.getAttribute('data-valid-from');
+      var validUntil = sel.getAttribute('data-valid-until');
+      var now = new Date();
+
+      if (validFrom && new Date(validFrom) > now) {
+        el.value = 'Kupon belum berlaku'; el.style.color = '#f44336';
+        return 0;
+      }
+      if (validUntil && new Date(validUntil) < now) {
+        el.value = 'Kupon kedaluwarsa'; el.style.color = '#f44336';
+        return 0;
+      }
+      if (subtotal < minOrder) {
+        el.value = 'Min. Rp ' + minOrder.toLocaleString('id-ID'); el.style.color = '#ff9800';
+        return 0;
+      }
+
+      var potongan = tipe === 'percentage' ? Math.round(subtotal * nominal / 100) : nominal;
+      el.value = tipe === 'percentage'
+        ? '-Rp ' + potongan.toLocaleString('id-ID') + ' (' + nominal + '%)'
+        : '-Rp ' + potongan.toLocaleString('id-ID');
+      el.style.color = '#4caf50';
+      return potongan;
+    }
+
+    function createCalc() {
+      var harga = parseInt(document.getElementById('createHarga').value.replace(/[^0-9]/g, '')) || 0;
+      var qty = parseInt(document.getElementById('createJumlah').value) || 0;
+      var kodeUnik = parseInt(document.getElementById('createKodeUnik').value.replace(/[^0-9]/g, '')) || 0;
+      var subtotal = harga * qty;
+      var potongan = createCalcKupon(subtotal);
+      var total = subtotal - potongan - kodeUnik;
+      if (total < 0) total = 0;
+      document.getElementById('createSubtotal').value = 'Rp ' + subtotal.toLocaleString('id-ID');
+      document.getElementById('createTotalDisplay').textContent = 'Rp ' + total.toLocaleString('id-ID');
+    }
+
+    // Pelanggan change → auto-fill Email & WA
+    document.getElementById('createPelanggan').addEventListener('change', function() {
+      var val = this.value;
+      var user = null;
+      if (createOrderData && createOrderData.users) {
+        createOrderData.users.forEach(function(u) {
+          if (String(u.id) === String(val)) user = u;
+        });
+      }
+      document.getElementById('createOrderEmail').value = user ? user.email : '';
+      document.getElementById('createOrderWa').value = user ? user.no_wa : '';
+    });
+
+    // Produk change → auto-fill Harga & Kode Unik → recalc
+    document.getElementById('createProduk').addEventListener('change', function() {
+      var sel = this.options[this.selectedIndex];
+      var harga = sel ? parseInt(sel.getAttribute('data-harga')) || 0 : 0;
+      var kodeUnik = sel ? parseInt(sel.getAttribute('data-kodeunik')) || 0 : 0;
+      document.getElementById('createHarga').value = 'Rp ' + harga.toLocaleString('id-ID');
+      document.getElementById('createKodeUnik').value = 'Rp ' + kodeUnik.toLocaleString('id-ID');
+      createCalc();
+    });
+
+    // Jumlah change → recalc
+    document.getElementById('createJumlah').addEventListener('input', function() {
+      createCalc();
+    });
+
+    // Kupon change → recalc
+    document.getElementById('createKupon').addEventListener('change', function() {
+      createCalc();
+    });
+
+    // Bank change → auto-fill No. Rekening & Atas Nama
+    document.getElementById('createBank').addEventListener('change', function() {
+      var sel = this.options[this.selectedIndex];
+      document.getElementById('createRekening').value = sel ? sel.getAttribute('data-rek') : '';
+      document.getElementById('createRekeningOwner').value = sel ? sel.getAttribute('data-owner') : '';
+    });
+
+    // Submit
+    document.getElementById('createOrderForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var btn = document.getElementById('createOrderBtn');
+      var em = document.getElementById('createOrderMessage');
+      em.style.display = 'none';
+
+      var hargaRaw = parseInt(document.getElementById('createHarga').value.replace(/[^0-9]/g, '')) || 0;
+      var qty = parseInt(document.getElementById('createJumlah').value) || 0;
+      var potonganRaw = parseInt(document.getElementById('createPotongan').value.replace(/[^0-9]/g, '')) || 0;
+      var kodeUnikRaw = parseInt(document.getElementById('createKodeUnik').value.replace(/[^0-9]/g, '')) || 0;
+      var subtotal = hargaRaw * qty;
+      var total = subtotal - potonganRaw - kodeUnikRaw;
+      if (total < 0) total = 0;
+
+      var body = {
+        status: document.getElementById('createOrderStatus').value,
+        account_id: parseInt(document.getElementById('createPelanggan').value) || null,
+        products_id: parseInt(document.getElementById('createProduk').value) || null,
+        harga: hargaRaw,
+        qty: qty,
+        subtotal: subtotal,
+        kupon_id: parseInt(document.getElementById('createKupon').value) || null,
+        diskon_jumlah: potonganRaw,
+        total: total,
+        bank_id: parseInt(document.getElementById('createBank').value) || null
+      };
+
+      if (!body.account_id || !body.products_id) {
+        em.style.display = 'block'; em.style.background = '#4a0e0e'; em.textContent = 'Pelanggan dan Produk wajib diisi.'; em.style.color = '#fff';
+        return;
+      }
+
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+      try {
+        const response = await fetch('/orders/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+          em.style.display = 'block'; em.style.background = '#1a4a1a'; em.textContent = 'Order berhasil dibuat! Invoice: ' + (data.data?.invoice || ''); em.style.color = '#fff';
+          setTimeout(function() { location.reload(); }, 1500);
+        } else {
+          em.style.display = 'block'; em.style.background = '#4a0e0e'; em.textContent = data.message || 'Gagal membuat order.'; em.style.color = '#fff';
+          btn.disabled = false; btn.textContent = 'Buat Order';
+        }
+      } catch (err) {
+        em.style.display = 'block'; em.style.background = '#4a0e0e'; em.textContent = 'Terjadi kesalahan.'; em.style.color = '#fff';
+        btn.disabled = false; btn.textContent = 'Buat Order';
       }
     });
 

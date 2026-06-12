@@ -43,6 +43,46 @@ const order = {
     }
   },
 
+  getCreateData: async (req, res) => {
+    if (!req.session.admin) {
+      return res.status(401).json({ status: 'failed', message: 'Unauthorized' });
+    }
+
+    try {
+      const apiResponse = await axios.get(`${API_BASE_URL}/admin/orders/create-data`, {
+        params: { admin_id: req.session.admin.id }
+      });
+      return res.json(apiResponse.data);
+    } catch (error) {
+      console.error('Get create data error:', error);
+      return res.status(error.response?.status || 500).json({
+        status: 'failed',
+        message: error.response?.data?.message || 'Gagal mengambil data'
+      });
+    }
+  },
+
+  create: async (req, res) => {
+    if (!req.session.admin) {
+      return res.status(401).json({ status: 'failed', message: 'Unauthorized' });
+    }
+
+    try {
+      const apiResponse = await axios.post(`${API_BASE_URL}/admin/orders`, {
+        ...req.body,
+        admin_id: req.session.admin.id
+      }, { withCredentials: true });
+
+      return res.json(apiResponse.data);
+    } catch (error) {
+      console.error('Create order error:', error);
+      return res.status(error.response?.status || 500).json({
+        status: 'failed',
+        message: error.response?.data?.message || 'Gagal membuat order'
+      });
+    }
+  },
+
   updateStatus: async (req, res) => {
     if (!req.session.admin) {
       return res.status(401).json({ status: 'failed', message: 'Unauthorized' });
