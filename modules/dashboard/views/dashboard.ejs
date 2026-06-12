@@ -122,6 +122,14 @@
     .btn-success { background: #2d6a4f; color: white; }
     .btn-success:hover { background: #1b4332; }
 
+    .avatar-thumb { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+    .avatar-thumb-icon { font-size: 30px; color: #556677; }
+    .avatar-edit { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #2a2a4a; }
+    .avatar-edit-icon { font-size: 80px; color: #556677; }
+    .avatar-upload-btn-admin { padding: 6px 14px; background: #0f3460; color: #e0e0e0; border: 1px solid #2a2a4a; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    .avatar-upload-btn-admin:hover { background: #1a1a2e; }
+    #editAvatarMessage { font-size: 12px; margin-top: 6px; }
+
     .filter-bar {
       display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
       align-items: center;
@@ -312,6 +320,7 @@
                     }
                   %>
                   <th>#</th>
+                  <th>Foto</th>
                   <th><a href="<%= sortUrlUsers('nama') %>" class="sort-link">Nama<%- sortArrowUsers('nama') %></a></th>
                   <th><a href="<%= sortUrlUsers('email') %>" class="sort-link">Email<%- sortArrowUsers('email') %></a></th>
                   <th><a href="<%= sortUrlUsers('no_wa') %>" class="sort-link">No. WA<%- sortArrowUsers('no_wa') %></a></th>
@@ -325,6 +334,14 @@
                 <% users.forEach(function(u, index){ %>
                   <tr>
                     <td><%= (usersPage - 1) * 10 + (index + 1) %></td>
+                    <td>
+                      <% if (u.foto) { %>
+                        <img src="<%= API_BASE_URL %><%= u.foto %>" class="avatar-thumb" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'">
+                        <i class="fas fa-user-circle avatar-thumb-icon" style="display:none;"></i>
+                      <% } else { %>
+                        <i class="fas fa-user-circle avatar-thumb-icon"></i>
+                      <% } %>
+                    </td>
                     <td><%= u.nama %></td>
                     <td><%= u.email %></td>
                     <td><%= u.no_wa || '-' %></td>
@@ -338,7 +355,8 @@
                         data-user-email="<%= encodeURIComponent(u.email) %>"
                         data-user-no-wa="<%= encodeURIComponent(u.no_wa || '') %>"
                         data-user-status="<%= u.status %>"
-                        data-user-role="<%= u.role %>">
+                        data-user-role="<%= u.role %>"
+                        data-user-foto="<%= u.foto || '' %>">
                         <i class="fas fa-edit"></i>
                       </button>
                       <button class="btn btn-sm btn-danger btn-reset-user"
@@ -731,6 +749,18 @@
       <h3><i class="fas fa-edit"></i> Edit User</h3>
       <form id="editUserForm">
         <input type="hidden" id="editUserId">
+        <input type="hidden" id="editUserFoto">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+          <div>
+            <img src="" class="avatar-edit" id="editAvatarPreview" style="display:none;">
+            <i class="fas fa-user-circle avatar-edit-icon" id="editAvatarIcon"></i>
+          </div>
+          <div>
+            <input type="file" id="editAvatarInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none;">
+            <button type="button" class="avatar-upload-btn-admin" id="editAvatarUploadBtn"><i class="fas fa-camera"></i> Ganti Foto</button>
+            <div id="editAvatarMessage"></div>
+          </div>
+        </div>
         <div class="form-group"><label>Nama</label><input type="text" id="editNama" required></div>
         <div class="form-group"><label>Email</label><input type="email" id="editEmail" required></div>
         <div class="form-group"><label>No. WhatsApp</label><input type="text" id="editNoWa"></div>
@@ -877,6 +907,20 @@
         document.getElementById('editStatus').value = btn.getAttribute('data-user-status');
         document.getElementById('editRole').value = btn.getAttribute('data-user-role');
         document.getElementById('editUserMessage').style.display = 'none';
+
+        var foto = btn.getAttribute('data-user-foto');
+        var editPreview = document.getElementById('editAvatarPreview');
+        var editIcon = document.getElementById('editAvatarIcon');
+        if (foto) {
+          editPreview.src = '<%= API_BASE_URL %>' + foto;
+          editPreview.style.display = 'block';
+          editIcon.style.display = 'none';
+        } else {
+          editPreview.style.display = 'none';
+          editIcon.style.display = 'block';
+        }
+        document.getElementById('editAvatarMessage').textContent = '';
+
         showModal('editUserModal');
       }
     });
@@ -919,6 +963,61 @@
         msg.style.display = 'block'; msg.style.color = '#ffffff'; msg.style.background = '#4a0e0e'; msg.textContent = 'Terjadi kesalahan. Silakan coba lagi!';
         btn.disabled = false; btn.textContent = 'Simpan';
       }
+    });
+
+    // === Edit User Avatar Upload ===
+    document.getElementById('editAvatarUploadBtn').addEventListener('click', function() {
+      document.getElementById('editAvatarInput').click();
+    });
+
+    document.getElementById('editAvatarInput').addEventListener('change', function() {
+      var file = this.files[0];
+      if (!file) return;
+
+      var msg = document.getElementById('editAvatarMessage');
+
+      if (file.size > 2 * 1024 * 1024) {
+        msg.textContent = 'Ukuran foto maksimal 2MB'; msg.style.color = '#f44336';
+        this.value = ''; return;
+      }
+
+      var validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        msg.textContent = 'Format tidak didukung'; msg.style.color = '#f44336';
+        this.value = ''; return;
+      }
+
+      msg.textContent = 'Mengupload...'; msg.style.color = '#8899aa';
+
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var base64 = e.target.result;
+        var userId = document.getElementById('editUserId').value;
+
+        fetch('/users/' + userId + '/upload-avatar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ foto_base64: base64 }),
+          credentials: 'include'
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.status === 'success') {
+            var preview = document.getElementById('editAvatarPreview');
+            var icon = document.getElementById('editAvatarIcon');
+            preview.src = '<%= API_BASE_URL %>' + data.data.foto;
+            preview.style.display = 'block';
+            icon.style.display = 'none';
+            msg.textContent = 'Foto berhasil diperbarui!'; msg.style.color = '#4caf50';
+          } else {
+            msg.textContent = data.message || 'Gagal upload'; msg.style.color = '#f44336';
+          }
+        })
+        .catch(function() {
+          msg.textContent = 'Terjadi kesalahan'; msg.style.color = '#f44336';
+        });
+      };
+      reader.readAsDataURL(file);
     });
 
     // === Cancel modal buttons ===

@@ -72,7 +72,10 @@ const dashboard = {
         // Order-specific params
         sort_by: sort_by,
         sort_dir: sort_dir,
-        filter_order_status: filter_order_status
+        filter_order_status: filter_order_status,
+
+        // API base URL for avatar
+        API_BASE_URL: API_BASE_URL
       });
     } catch (error) {
       console.error('Dashboard error:', error);
@@ -93,7 +96,8 @@ const dashboard = {
         user_sort_dir: user_sort_dir,
         sort_by: sort_by,
         sort_dir: sort_dir,
-        filter_order_status: filter_order_status
+        filter_order_status: filter_order_status,
+        API_BASE_URL: API_BASE_URL
       });
     }
   }
