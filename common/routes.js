@@ -51,6 +51,12 @@ router.post("/users/:id/reset-password", async (req, res) => {
 });
 
 // Order management
+router.get("/orders/create-data", async (req, res) => {
+  order.getCreateData(req, res);
+});
+router.post("/orders/create", async (req, res) => {
+  order.create(req, res);
+});
 router.get("/orders/:id/edit-data", async (req, res) => {
   order.getEditData(req, res);
 });
