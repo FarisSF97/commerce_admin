@@ -320,7 +320,6 @@
                     }
                   %>
                   <th>#</th>
-                  <th>Foto</th>
                   <th><a href="<%= sortUrlUsers('nama') %>" class="sort-link">Nama<%- sortArrowUsers('nama') %></a></th>
                   <th><a href="<%= sortUrlUsers('email') %>" class="sort-link">Email<%- sortArrowUsers('email') %></a></th>
                   <th><a href="<%= sortUrlUsers('no_wa') %>" class="sort-link">No. WA<%- sortArrowUsers('no_wa') %></a></th>
@@ -336,13 +335,13 @@
                     <td><%= (usersPage - 1) * 10 + (index + 1) %></td>
                     <td>
                       <% if (u.foto) { %>
-                        <img src="<%= API_BASE_URL %><%= u.foto %>" class="avatar-thumb" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'">
-                        <i class="fas fa-user-circle avatar-thumb-icon" style="display:none;"></i>
+                        <img src="<%= API_BASE_URL %><%= u.foto %>" class="avatar-thumb" style="vertical-align:middle;margin-right:8px;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'">
+                        <i class="fas fa-user-circle avatar-thumb-icon" style="display:none;vertical-align:middle;margin-right:8px;"></i>
                       <% } else { %>
-                        <i class="fas fa-user-circle avatar-thumb-icon"></i>
+                        <i class="fas fa-user-circle avatar-thumb-icon" style="vertical-align:middle;margin-right:8px;"></i>
                       <% } %>
+                      <%= u.nama %>
                     </td>
-                    <td><%= u.nama %></td>
                     <td><%= u.email %></td>
                     <td><%= u.no_wa || '-' %></td>
                     <td><span class="badge badge-<%= u.status %>"><%= u.status %></span></td>
