@@ -67,8 +67,7 @@ const user = {
 
     try {
       const apiResponse = await axios.put(`${API_BASE_URL}/admin/users/${req.params.id}/password`, {
-        admin_id: req.session.admin.id,
-        password: req.body.password
+        admin_id: req.session.admin.id
       }, { withCredentials: true });
 
       return res.json(apiResponse.data);
