@@ -262,6 +262,10 @@
         <h3><i class="fas fa-key"></i> Ubah Password</h3>
         <form id="changePasswordForm" style="max-width: 400px;">
           <div class="form-group">
+            <label for="currentPassword">Password Saat Ini</label>
+            <input type="password" id="currentPassword" placeholder="Masukkan password saat ini" required>
+          </div>
+          <div class="form-group">
             <label for="newPassword">Password Baru</label>
             <input type="password" id="newPassword" placeholder="Masukkan password baru" minlength="4" required>
           </div>
@@ -774,6 +778,7 @@
     // === Change Password ===
     document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
       e.preventDefault();
+      const currentPassword = document.getElementById('currentPassword').value;
       const newPassword = document.getElementById('newPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       const msg = document.getElementById('password-message');
@@ -781,8 +786,11 @@
 
       msg.style.display = 'none';
 
+      if (!currentPassword) {
+        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Password saat ini harus diisi!'; return;
+      }
       if (newPassword !== confirmPassword) {
-        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Password tidak sama!'; return;
+        msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Password baru tidak sama!'; return;
       }
       if (newPassword.length < 4) {
         msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = 'Password minimal 4 karakter!'; return;
@@ -794,14 +802,12 @@
         const response = await fetch('/process_change_password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password: newPassword }),
+          body: JSON.stringify({ current_password: currentPassword, password: newPassword }),
           credentials: 'include'
         });
         const data = await response.json();
         if (data.status === 'success') {
-          msg.style.display = 'block'; msg.style.background = '#1b4332'; msg.textContent = 'Password berhasil diubah!';
-          document.getElementById('newPassword').value = '';
-          document.getElementById('confirmPassword').value = '';
+          window.location.href = '/logout';
         } else {
           msg.style.display = 'block'; msg.style.background = '#4a0e0e'; msg.textContent = data.message || 'Gagal ubah password';
         }
